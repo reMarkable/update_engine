@@ -74,6 +74,7 @@ libupdate_engine_a_SOURCES = \
 	src/strings/string_number_conversions.cc \
 	src/strings/string_printf.cc \
 	src/strings/string_split.cc \
+	src/rootdev/rootdev.c \
 	src/update_engine/action_processor.cc \
 	src/update_engine/bzip.cc \
 	src/update_engine/bzip_extent_writer.cc \

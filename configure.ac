@@ -87,15 +87,15 @@ PKG_CHECK_MODULES([DEPS],
 
 # Make sure logging can be configured with command line flags. If glog
 # was built with gflags support it will include the gflags header.
-AC_MSG_CHECKING([glog uses gflags])
+#AC_MSG_CHECKING([glog uses gflags])
 AC_LANG_PUSH([C++])
-AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <glog/logging.h>
-                                    #ifndef DECLARE_VARIABLE
-                                    #error MISSING_GFLAGS
-                                    #endif]])],
-                  [AC_MSG_RESULT([yes])],
-                  [AC_MSG_RESULT([no])
-                   AC_MSG_ERROR([*** glog missing gflags support])])
+#AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <glog/logging.h>
+#                                    #ifndef DECLARE_VARIABLE
+#                                    #error MISSING_GFLAGS
+#                                    #endif]])],
+#                  [AC_MSG_RESULT([yes])],
+#                  [AC_MSG_RESULT([no])
+#                   AC_MSG_ERROR([*** glog missing gflags support])])
 AC_LANG_POP([C++])
 
 AC_ARG_ENABLE([delta_generator],

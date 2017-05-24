@@ -14,7 +14,6 @@ AM_CFLAGS = -fno-exceptions \
 	    -Wall \
 	    -Wclobbered \
 	    -Wempty-body \
-	    -Werror \
 	    -Wignored-qualifiers \
 	    -Wmissing-field-initializers \
 	    -Wsign-compare \

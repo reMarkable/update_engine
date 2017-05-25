@@ -66,7 +66,7 @@ void SetupDbusService(UpdateEngineService* service) {
                << DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER;
   }
   dbus_g_connection_register_g_object(bus,
-                                      "/com/coreos/update1",
+                                      "/no/remarkable/update1",
                                       G_OBJECT(service));
 }
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
   if (!FLAGS_foreground)
     PLOG_IF(FATAL, daemon(0, 0) == 1) << "daemon() failed";
 
-  LOG(INFO) << "CoreOS Update Engine starting";
+  LOG(INFO) << "reMarkable Update Engine starting";
 
   // Ensure that all written files have safe permissions.
   // This is a mask, so we _block_ execute for the owner, and ALL
@@ -142,6 +142,6 @@ int main(int argc, char** argv) {
   update_attempter->set_dbus_service(NULL);
   g_object_unref(G_OBJECT(service));
 
-  LOG(INFO) << "CoreOS Update Engine terminating";
+  LOG(INFO) << "reMarkable Update Engine terminating";
   return 0;
 }

@@ -28,7 +28,7 @@ class OmahaRequestParamsTest : public ::testing::Test {
   bool DoTest(OmahaRequestParams* out);
 
   virtual void SetUp() {
-    ASSERT_EQ(0, System(string("mkdir -p ") + kTestDir + "/usr/share/coreos"));
+    ASSERT_EQ(0, System(string("mkdir -p ") + kTestDir + "/usr/share/remarkable"));
     // Create a fresh copy of the params for each test, so there's no
     // unintended reuse of state across tests.
     MockSystemState mock_system_state;
@@ -71,9 +71,9 @@ string GetMachineType() {
 
 TEST_F(OmahaRequestParamsTest, SimpleTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=bar\n"
-      "COREOS_RELEASE_VERSION=0.2.2.3\n"
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=bar\n"
+      "REMARKABLE_RELEASE_VERSION=0.2.2.3\n"
       "GROUP=dev-channel\n"
       "SERVER=http://www.google.com"));
   MockSystemState mock_system_state;
@@ -91,11 +91,11 @@ TEST_F(OmahaRequestParamsTest, SimpleTest) {
 
 TEST_F(OmahaRequestParamsTest, AppIDTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=bar\n"
-      "COREOS_RELEASE_VERSION=0.2.2.3\n"
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=bar\n"
+      "REMARKABLE_RELEASE_VERSION=0.2.2.3\n"
       "GROUP=dev-channel\n"
-      "COREOS_RELEASE_APPID={58c35cef-9d30-476e-9098-ce20377d535d}\n"
+      "REMARKABLE_RELEASE_APPID={58c35cef-9d30-476e-9098-ce20377d535d}\n"
       "SERVER=http://www.google.com"));
   MockSystemState mock_system_state;
   OmahaRequestParams out(&mock_system_state);
@@ -112,10 +112,10 @@ TEST_F(OmahaRequestParamsTest, AppIDTest) {
 
 TEST_F(OmahaRequestParamsTest, MissingChannelTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=bar\n"
-      "COREOS_RELEASE_VERSION=0.2.2.3\n"
-      "COREOS_RELEASE_TRXCK=dev-channel"));
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=bar\n"
+      "REMARKABLE_RELEASE_VERSION=0.2.2.3\n"
+      "REMARKABLE_RELEASE_TRXCK=dev-channel"));
   MockSystemState mock_system_state;
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
@@ -128,10 +128,10 @@ TEST_F(OmahaRequestParamsTest, MissingChannelTest) {
 
 TEST_F(OmahaRequestParamsTest, ConfusingReleaseTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=COREOS_RELEASE_VERSION=1.2.3.4\n"
-      "COREOS_RELEASE_VERSION=0.2.2.3\n"
-      "COREOS_RELEASE_TRXCK=dev-channel"));
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=REMARKABLE_RELEASE_VERSION=1.2.3.4\n"
+      "REMARKABLE_RELEASE_VERSION=0.2.2.3\n"
+      "REMARKABLE_RELEASE_TRXCK=dev-channel"));
   MockSystemState mock_system_state;
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
@@ -144,8 +144,8 @@ TEST_F(OmahaRequestParamsTest, ConfusingReleaseTest) {
 
 TEST_F(OmahaRequestParamsTest, MissingVersionTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=bar\n"
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=bar\n"
       "GROUP=dev-channel"));
   MockSystemState mock_system_state;
   OmahaRequestParams out(&mock_system_state);
@@ -160,9 +160,9 @@ TEST_F(OmahaRequestParamsTest, MissingVersionTest) {
 
 TEST_F(OmahaRequestParamsTest, MissingURLTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=bar\n"
-      "COREOS_RELEASE_VERSION=0.2.2.3\n"
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=bar\n"
+      "REMARKABLE_RELEASE_VERSION=0.2.2.3\n"
       "GROUP=dev-channel"));
   MockSystemState mock_system_state;
   OmahaRequestParams out(&mock_system_state);
@@ -178,9 +178,9 @@ TEST_F(OmahaRequestParamsTest, MissingURLTest) {
 
 TEST_F(OmahaRequestParamsTest, ValidChannelTest) {
   ASSERT_TRUE(WriteFileString(
-      kTestDir + "/usr/share/coreos/release",
-      "COREOS_RELEASE_FOO=bar\n"
-      "COREOS_RELEASE_VERSION=0.2.2.3\n"
+      kTestDir + "/usr/share/remarkable/release",
+      "REMARKABLE_RELEASE_FOO=bar\n"
+      "REMARKABLE_RELEASE_VERSION=0.2.2.3\n"
       "GROUP=dev-channel\n"
       "SERVER=http://www.google.com"));
   MockSystemState mock_system_state;

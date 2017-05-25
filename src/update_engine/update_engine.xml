@@ -3,8 +3,8 @@
      dbus-binding-tool -mode=glib-server -prefix=update_engine update_engine.xml
                         &gt; glib_server.h
 -->
-<node name="/com/coreos/update1/Manager">
-  <interface name="com.coreos.update1.Manager">
+<node name="/no/remarkable/update1/Manager">
+  <interface name="no.remarkable.update1.Manager">
     <annotation name="org.freedesktop.DBus.GLib.CSymbol"
                 value="update_engine_service"/>
     <method name="AttemptUpdate">

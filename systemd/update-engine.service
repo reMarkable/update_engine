@@ -5,7 +5,7 @@ ConditionPathExists=!/usr/.noupdate
 
 [Service]
 Type=dbus
-BusName=com.coreos.update1
+BusName=no.remarkable.update1
 ExecStart=/usr/sbin/update_engine -foreground -logtostderr
 BlockIOWeight=100
 Restart=always

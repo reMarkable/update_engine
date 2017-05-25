@@ -42,8 +42,8 @@ if ENABLE_DELTA_GENERATOR
 bin_PROGRAMS += delta_generator
 endif
 
-sbin_SCRIPTS = coreos-postinst \
-	       coreos-setgoodroot \
+sbin_SCRIPTS = remarkable-postinst \
+	       remarkable-setgoodroot \
 	       systemd/update_engine_stub
 
 noinst_LIBRARIES = libupdate_engine.a

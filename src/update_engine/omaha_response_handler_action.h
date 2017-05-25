@@ -66,7 +66,7 @@ class OmahaResponseHandlerAction : public Action<OmahaResponseHandlerAction> {
                             std::string* install_dev);
 
   // Selects the kernel path associated with the given partition path.
-  // E.g., /dev/sda4 -> /boot/coreos/vmlinuz-a
+  // E.g., /dev/sda4 -> /boot/remarkable/vmlinuz-a
   static bool GetKernelPath(const std::string& part_path,
                             std::string* kernel_path);
 

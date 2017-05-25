@@ -92,7 +92,7 @@ bool ResetStatus() {
   CHECK(GetProxy(&proxy));
 
   gboolean rc =
-      com_coreos_update1_Manager_reset_status(proxy, &error);
+      no_remarkable_update1_Manager_reset_status(proxy, &error);
   return rc;
 }
 
@@ -111,7 +111,7 @@ bool GetStatus(string* op) {
   char* new_version = NULL;
   gint64 new_size = 0;
 
-  gboolean rc = com_coreos_update1_Manager_get_status(
+  gboolean rc = no_remarkable_update1_Manager_get_status(
       proxy,
       &last_checked_time,
       &progress,
@@ -178,7 +178,7 @@ bool CheckForUpdates() {
   CHECK(GetProxy(&proxy));
 
   gboolean rc =
-      com_coreos_update1_Manager_attempt_update(proxy, &error);
+      no_remarkable_update1_Manager_attempt_update(proxy, &error);
   CHECK_EQ(rc, TRUE) << "Error checking for update: "
                      << GetAndFreeGError(&error);
   return true;

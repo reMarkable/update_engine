@@ -27,18 +27,18 @@ namespace chromeos_update_engine {
 
 const char* const OmahaRequestParams::kAppId(
     "{e96281a6-d1af-4bde-9a0a-97b76e56dc57}");
-const char* const OmahaRequestParams::kOsPlatform("CoreOS");
-const char* const OmahaRequestParams::kOsVersion("Chateau");
+const char* const OmahaRequestParams::kOsPlatform("reMarkable");
+const char* const OmahaRequestParams::kOsVersion("ZeroGravitas");
 const char* const OmahaRequestParams::kDefaultChannel("stable");
 const char* const kProductionOmahaUrl(
-    "https://public.update.core-os.net/v1/update/");
+    "https://updates.cloud.remarkable.engineering/v1/update/");
 
 bool OmahaRequestParams::Init(bool interactive) {
   os_platform_ = OmahaRequestParams::kOsPlatform;
   os_version_ = OmahaRequestParams::kOsVersion;
   oemid_ = GetOemValue("ID", "");
   oemversion_ = GetOemValue("VERSION_ID", "");
-  app_version_ = GetConfValue("COREOS_RELEASE_VERSION", "");
+  app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");
 
   if (!system_state_->prefs()->GetString(kPrefsAlephVersion, &alephversion_)) {
     alephversion_.assign(app_version_);
@@ -46,8 +46,8 @@ bool OmahaRequestParams::Init(bool interactive) {
   }
 
   os_sp_ = app_version_ + "_" + GetMachineType();
-  os_board_ = GetConfValue("COREOS_RELEASE_BOARD", "");
-  app_id_ = GetConfValue("COREOS_RELEASE_APPID", OmahaRequestParams::kAppId);
+  os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
+  app_id_ = GetConfValue("REMARKABLE_RELEASE_APPID", OmahaRequestParams::kAppId);
   app_lang_ = "en-US";
   bootid_ = utils::GetBootId();
   machineid_ = utils::GetMachineId();
@@ -86,9 +86,9 @@ string OmahaRequestParams::SearchConfValue(const vector<string>& files,
 string OmahaRequestParams::GetConfValue(const string& key,
                                         const string& default_value) const {
   vector<string> files;
-  files.push_back("/etc/coreos/update.conf");
-  files.push_back("/usr/share/coreos/update.conf");
-  files.push_back("/usr/share/coreos/release");
+  files.push_back("/etc/remarkable/update.conf");
+  files.push_back("/usr/share/remarkable/update.conf");
+  files.push_back("/usr/share/remarkable/release");
   return SearchConfValue(files, key, default_value);
 }
 

@@ -87,7 +87,7 @@ elif [[ -z "${INSTALL_KERNEL}" ]]; then
     # not a legacy system but update_engine didn't handle the kernel.
     # kernel names are in lower case, ${SLOT,,} converts the slot name
     cp -v "${INSTALL_MNT}/boot/vmlinuz" \
-       "${ESP_MNT}/coreos/vmlinuz-${SLOT,,}"
+       "${ESP_MNT}/remarkable/vmlinuz-${SLOT,,}"
 fi
 
 # If the OEM provides a hook, call it
@@ -122,7 +122,7 @@ if [ -e ${PLATFORM_PATH} ]; then
     sum=($(md5sum ${PLATFORM_PATH}))
     if [ ${sum} == "6315addf42c0b07f5f78d119b578e20a" ]; then
         sed --in-place \
-            "s%distname = os_release_info\['NAME'\]%distname = \"CoreOS\"%" \
+            "s%distname = os_release_info\['NAME'\]%distname = \"reMarkable\"%" \
             ${PLATFORM_PATH}
     fi
 fi
@@ -164,5 +164,5 @@ call_cgpt add -S0 -T1 "${INSTALL_DEV}"
 call_cgpt prioritize "${INSTALL_DEV}"
 call_cgpt show "${INSTALL_DEV}"
 
-cat "${INSTALL_MNT}/share/coreos/release"
+cat "${INSTALL_MNT}/share/remarkable/release"
 echo "Setup ${INSTALL_LABEL} (${INSTALL_DEV}) for next boot."

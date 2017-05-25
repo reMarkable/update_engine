@@ -7,11 +7,11 @@
 
 namespace chromeos_update_engine {
 
-static const char* const kUpdateEngineServiceName = "com.coreos.update1";
+static const char* const kUpdateEngineServiceName = "no.remarkable.update1";
 static const char* const kUpdateEngineServicePath =
-    "/com/coreos/update1";
+    "/no/remarkable/update1";
 static const char* const kUpdateEngineServiceInterface =
-    "com.coreos.update1.Manager";
+    "no.remarkable.update1.Manager";
 }  // namespace chromeos_update_engine
 
 #endif  // CHROMEOS_PLATFORM_UPDATE_ENGINE_DBUS_CONSTANTS_H__

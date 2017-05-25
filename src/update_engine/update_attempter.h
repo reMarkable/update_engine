@@ -83,7 +83,7 @@ class UpdateAttempter : public ActionProcessorDelegate,
                  std::string* new_version,
                  int64_t* new_size);
 
-  // Runs coreos-setgootroot, whose responsibility it is to mark the
+  // Runs remarkable-setgootroot, whose responsibility it is to mark the
   // currently booted partition has high priority/permanent/etc. The execution
   // is asynchronous. On completion, the action processor may be started
   // depending on the |start_action_processor_| field. Note that every update
@@ -260,7 +260,7 @@ class UpdateAttempter : public ActionProcessorDelegate,
   bool update_boot_flags_running_;  // True if UpdateBootFlags is running.
 
   // The command to run to set the current system as good.
-  std::string set_good_partition_cmd_ = "/usr/sbin/coreos-setgoodroot";
+  std::string set_good_partition_cmd_ = "/usr/sbin/remarkable-setgoodroot";
 
   // True if the action processor needs to be started by the boot flag updater.
   bool start_action_processor_;

@@ -142,7 +142,7 @@ class OmahaRequestParams {
   std::string os_sp_;
   std::string os_board_;
 
-  std::string app_id_;	// The app_id identifies CoreOS to the update service.
+  std::string app_id_;	// The app_id identifies reMarkable to the update service.
   std::string app_version_;
   std::string app_lang_;
   std::string app_channel_; // Current update group, aka channel, aka track.
@@ -150,8 +150,8 @@ class OmahaRequestParams {
   std::string bootid_;  // Kernel generated guid that identifies this boot
   std::string machineid_; // Unique machine ID that is set during installation 
   std::string oemid_; // Unique machine ID that is set during installation 
-  std::string oemversion_; // CoreOS version set during installation
-  std::string alephversion_; // first CoreOS version cached by update_engine
+  std::string oemversion_; // reMarkable version set during installation
+  std::string alephversion_; // first reMarkable version cached by update_engine
   bool delta_okay_;  // If this client can accept a delta
   bool interactive_;   // Whether this is a user-initiated update check
 

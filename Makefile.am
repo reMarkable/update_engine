@@ -36,7 +36,7 @@ AM_CFLAGS += -fprofile-arcs -ftest-coverage
 LDADD += -lgcov
 endif
 
-sbin_PROGRAMS = update_engine
+sbin_PROGRAMS = update_engine rootdev
 bin_PROGRAMS = update_engine_client
 if ENABLE_DELTA_GENERATOR
 bin_PROGRAMS += delta_generator
@@ -46,19 +46,30 @@ sbin_SCRIPTS = remarkable-postinst \
 	       remarkable-setgoodroot \
 	       systemd/update_engine_stub
 
-noinst_LIBRARIES = libupdate_engine.a
+noinst_LIBRARIES = libupdate_engine.a librootdev.a
+
+rootdevincludedir = $(includedir)/rootdev
+rootdevinclude_HEADERS = src/rootdev/rootdev.h
 
 check_PROGRAMS = update_engine_unittests test_http_server
 TESTS = run_unittests_as_user run_unittests_as_root
 EXTRA_DIST += $(TESTS)
 
-update_engine_LDADD = libupdate_engine.a $(LDADD)
+librootdev_a_SOURCES = src/rootdev/rootdev.c
+librootdev_a_CFLAGS = -Wall -Werror -std=gnu99
+librootdev_a_LDFLAGS = -export-symbols-regex '^rootdev_' \
+			-version-info 1:0:0
+
+rootdev_SOURCES = src/rootdev/main.c
+rootdev_LDADD = librootdev.a
+
+update_engine_LDADD = libupdate_engine.a librootdev.a $(LDADD)
 update_engine_SOURCES = src/update_engine/main.cc
 
-delta_generator_LDADD = libupdate_engine.a $(LDADD)
+delta_generator_LDADD = libupdate_engine.a librootdev.a $(LDADD)
 delta_generator_SOURCES = src/update_engine/generate_delta_main.cc
 
-update_engine_client_LDADD = libupdate_engine.a $(LDADD)
+update_engine_client_LDADD = libupdate_engine.a librootdev.a $(LDADD)
 update_engine_client_SOURCES = src/update_engine/update_engine_client.cc
 
 libupdate_engine_a_SOURCES = \
@@ -73,7 +84,6 @@ libupdate_engine_a_SOURCES = \
 	src/strings/string_number_conversions.cc \
 	src/strings/string_printf.cc \
 	src/strings/string_split.cc \
-	src/rootdev/rootdev.c \
 	src/update_engine/action_processor.cc \
 	src/update_engine/bzip.cc \
 	src/update_engine/bzip_extent_writer.cc \
@@ -178,7 +188,7 @@ update_engine_unittests_SOURCES = \
 	src/update_engine/utils_unittest.cc \
 	src/update_engine/zip_unittest.cc
 
-test_http_server_LDADD = libupdate_engine.a $(LDADD)
+test_http_server_LDADD = libupdate_engine.a librootdev.a $(LDADD)
 test_http_server_SOURCES = src/update_engine/test_http_server.cc
 
 EXTRA_DIST += src/update_engine/marshal.list

@@ -105,9 +105,9 @@ bool OmahaResponseHandlerAction::GetInstallDev(const std::string& boot_dev,
   TEST_AND_RETURN_FALSE(utils::StringHasPrefix(boot_dev, "/dev/"));
   string ret(boot_dev);
   string::reverse_iterator it = ret.rbegin();  // last character in string
-  // Right now, we just switch '3' and '4' partition numbers.
-  TEST_AND_RETURN_FALSE((*it == '3') || (*it == '4'));
-  *it = (*it == '3') ? '4' : '3';
+  // Right now, we just switch '2' and '3' partition numbers.
+  TEST_AND_RETURN_FALSE((*it == '2') || (*it == '3'));
+  *it = (*it == '2') ? '3' : '2';
   *install_dev = ret;
   return true;
 }

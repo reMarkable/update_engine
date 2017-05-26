@@ -5,12 +5,9 @@
 
 set -e
 
-# Look up the currently mounted usr partition.
-dev=$(rootdev -s /usr)
+bootdev=$(fw_printenv -n mmcroot)
 
-# Repair partition table if required (e.g. the backup GPT may be out of sync)
-cgpt repair "${dev}"
-
-# Mark /usr as successfully booted (success=1, tries=0) and highest priority.
-cgpt add -S1 -T0 "${dev}"
-cgpt prioritize "${dev}"
+if [[ "$bootdev" == "$(rootdev)" ]]; then
+    fw_setenv upgrade_available 0
+    fw_setenv bootcount 0
+fi

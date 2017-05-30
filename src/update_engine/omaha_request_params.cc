@@ -95,8 +95,8 @@ string OmahaRequestParams::GetConfValue(const string& key,
 string OmahaRequestParams::GetOemValue(const string& key,
                                        const string& default_value) const {
   vector<string> files;
-  files.push_back("/etc/oem-release");
-  files.push_back("/usr/share/oem/oem-release");
+  files.push_back("/etc/os-release");
+  files.push_back("/usr/share/oem/os-release");
   return SearchConfValue(files, key, default_value);
 }
 

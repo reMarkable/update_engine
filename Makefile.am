@@ -56,7 +56,7 @@ TESTS = run_unittests_as_user run_unittests_as_root
 EXTRA_DIST += $(TESTS)
 
 librootdev_a_SOURCES = src/rootdev/rootdev.c
-librootdev_a_CFLAGS = -Wall -Werror -std=gnu99
+librootdev_a_CFLAGS = -Wall -std=gnu99
 librootdev_a_LDFLAGS = -export-symbols-regex '^rootdev_' \
 			-version-info 1:0:0
 

@@ -26,7 +26,7 @@ using std::vector;
 namespace chromeos_update_engine {
 
 const char* const OmahaRequestParams::kAppId(
-    "{e96281a6-d1af-4bde-9a0a-97b76e56dc57}");
+    "{98da7df2-4e3e-4744-9de6-ec931886abab}");
 const char* const OmahaRequestParams::kOsPlatform("reMarkable");
 const char* const OmahaRequestParams::kOsVersion("ZeroGravitas");
 const char* const OmahaRequestParams::kDefaultChannel("stable");
@@ -97,7 +97,11 @@ string OmahaRequestParams::GetOemValue(const string& key,
   vector<string> files;
   files.push_back("/etc/os-release");
   files.push_back("/usr/share/oem/os-release");
-  return SearchConfValue(files, key, default_value);
+  string ret = SearchConfValue(files, key, default_value);
+  if (ret.front() == '"' && ret.back() == '"') {
+      ret = ret.substr(1, ret.length() - 2);
+  }
+  return ret;
 }
 
 string OmahaRequestParams::GetMachineType() const {

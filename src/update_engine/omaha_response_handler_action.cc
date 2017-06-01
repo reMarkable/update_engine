@@ -67,6 +67,7 @@ void OmahaResponseHandlerAction::PerformAction() {
       install_plan_.old_partition_path,
       &install_plan_.partition_path));
 
+#if 0
   TEST_AND_RETURN(GetKernelPath(
       install_plan_.old_partition_path,
       &install_plan_.old_kernel_path));
@@ -74,6 +75,7 @@ void OmahaResponseHandlerAction::PerformAction() {
   TEST_AND_RETURN(GetKernelPath(
       install_plan_.partition_path,
       &install_plan_.kernel_path));
+#endif
 
   TEST_AND_RETURN(HasOutputPipe());
   if (HasOutputPipe())

@@ -134,11 +134,11 @@ bool OmahaResponseHandlerAction::GetKernelPath(const std::string& part_path,
   // If the target fs is 3, the kernel name is vmlinuz-a.
   // If the target fs is 4, the kernel name is vmlinuz-b.
   char last_char = part_path[part_path.size() - 1];
-  if (last_char == '3') {
+  if (last_char == '2') {
     *kernel_path = "/boot/remarkable/vmlinuz-a";
     return true;
   }
-  if (last_char == '4') {
+  if (last_char == '3') {
     *kernel_path = "/boot/remarkable/vmlinuz-b";
     return true;
   }

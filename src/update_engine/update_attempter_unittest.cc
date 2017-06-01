@@ -16,7 +16,6 @@
 #include "update_engine/mock_http_fetcher.h"
 #include "update_engine/mock_payload_state.h"
 #include "update_engine/mock_system_state.h"
-#include "update_engine/pcr_policy_post_action.h"
 #include "update_engine/postinstall_runner_action.h"
 #include "update_engine/prefs.h"
 #include "update_engine/prefs_mock.h"
@@ -314,7 +313,6 @@ const string kActionTypes[] = {
   OmahaRequestAction::StaticType(),
   FilesystemCopierAction::StaticType(),
   KernelVerifierAction::StaticType(),
-  PCRPolicyPostAction::StaticType(),
   PostinstallRunnerAction::StaticType(),
   OmahaRequestAction::StaticType()
 };

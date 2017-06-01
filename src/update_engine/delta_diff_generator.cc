@@ -369,20 +369,19 @@ void InstallOperationsToManifest(
   }
 }
 
-// Add a new procedure of type |proc_type| with operations |ops| to |manifest|.
-// Filters out no-op operations.  Computes hash for old and new paths.
-bool AddProcedureToManifest(
-    const string& old_path,
-    const string& new_path,
-    InstallProcedure_Type proc_type,
-    const vector<InstallOperation>& ops,
+// Adds all |kernel_ops| to |manifest|. Filters out no-op operations.
+// Computes hash for old and new kernel images.
+bool KernelProcedureToManifest(
+    const string& old_kernel_path,
+    const string& new_kernel_path,
+    const vector<InstallOperation>& kernel_ops,
     DeltaArchiveManifest* manifest) {
-  DCHECK(!ops.empty());
-  DCHECK(!new_path.empty());
+  DCHECK(!kernel_ops.empty());
+  DCHECK(!new_kernel_path.empty());
 
   InstallProcedure* proc = manifest->add_procedures();
-  proc->set_type(proc_type);
-  for (const InstallOperation& add_op : ops) {
+  proc->set_type(InstallProcedure_Type_KERNEL);
+  for (const InstallOperation& add_op : kernel_ops) {
     if (DeltaDiffGenerator::IsNoopOperation(add_op)) {
       continue;
     }
@@ -390,13 +389,13 @@ bool AddProcedureToManifest(
     *op = add_op;
   }
 
-  if (!old_path.empty()) {
+  if (!old_kernel_path.empty()) {
     TEST_AND_RETURN_FALSE(
-        DeltaDiffGenerator::InitializeInfo(old_path,
+        DeltaDiffGenerator::InitializeInfo(old_kernel_path,
                                            proc->mutable_old_info()));
   }
   TEST_AND_RETURN_FALSE(
-      DeltaDiffGenerator::InitializeInfo(new_path,
+      DeltaDiffGenerator::InitializeInfo(new_kernel_path,
                                          proc->mutable_new_info()));
   return true;
 }
@@ -432,18 +431,17 @@ void CheckGraph(const Graph& graph) {
   }
 }
 
-// Delta compresses a file |new_path| with knowledge of the old file
-// |old_path|. If |old_file| is an empty string generate a full update.
-bool DeltaCompressFile(
-    const string& old_path,
-    const string& new_path,
+// Delta compresses a kernel partition |new_kernel| with knowledge of the
+// old kernel partition |old_kernel|. If |old_kernel| is an empty string,
+// generates a full update of the partition.
+bool DeltaCompressKernel(
+    const string& old_kernel,
+    const string& new_kernel,
     vector<InstallOperation>* ops,
     int blobs_fd,
     off_t* blobs_length) {
-  if (old_path.empty())
-    LOG(INFO) << "Compressing " << new_path;
-  else
-    LOG(INFO) << "Delta compressing " << new_path << " using " << old_path;
+  LOG(INFO) << "Delta compressing kernel partition...";
+  LOG_IF(INFO, old_kernel.empty()) << "Generating full kernel update...";
 
   // Add a new install operation
   ops->resize(1);
@@ -451,8 +449,8 @@ bool DeltaCompressFile(
 
   vector<char> data;
   TEST_AND_RETURN_FALSE(
-      DeltaDiffGenerator::ReadFileToDiff(old_path,
-                                         new_path,
+      DeltaDiffGenerator::ReadFileToDiff(old_kernel,
+                                         new_kernel,
                                          true, // bsdiff_allowed
                                          &data,
                                          op,
@@ -467,7 +465,7 @@ bool DeltaCompressFile(
   TEST_AND_RETURN_FALSE(utils::WriteAll(blobs_fd, &data[0], data.size()));
   *blobs_length += data.size();
 
-  LOG(INFO) << "Done delta compressing " << new_path << ": "
+  LOG(INFO) << "Done delta compressing kernel partition: "
             << kInstallOperationTypes[op->type()];
   return true;
 }
@@ -1315,7 +1313,6 @@ bool DeltaDiffGenerator::GenerateDeltaUpdateFile(
     const string& new_image,
     const string& old_kernel,
     const string& new_kernel,
-    const string& pcr_policy,
     const string& output_path,
     const string& private_key_path,
     uint64_t* metadata_size) {
@@ -1341,12 +1338,9 @@ bool DeltaDiffGenerator::GenerateDeltaUpdateFile(
     }
   }
 
-  // Sanity check optional input files.
   if (!new_kernel.empty()) {
-    TEST_AND_RETURN_FALSE(utils::FileSize(new_kernel) > 0);
-  }
-  if (!pcr_policy.empty()) {
-    TEST_AND_RETURN_FALSE(utils::FileSize(pcr_policy) > 0);
+    // Sanity check kernel partition arg
+    TEST_AND_RETURN_FALSE(utils::FileSize(new_kernel) >= 0);
   }
 
   vector<Block> blocks(new_image_size / kBlockSize);
@@ -1366,7 +1360,7 @@ bool DeltaDiffGenerator::GenerateDeltaUpdateFile(
 
   LOG(INFO) << "Reading files...";
 
-  vector<InstallOperation> kernel_ops, pcr_policy_ops;
+  vector<InstallOperation> kernel_ops;
 
   vector<Vertex::Index> final_order;
   {
@@ -1406,19 +1400,13 @@ bool DeltaDiffGenerator::GenerateDeltaUpdateFile(
                                                 &graph.back()));
 
       if (!new_kernel.empty()) {
-        TEST_AND_RETURN_FALSE(DeltaCompressFile(old_kernel,
-                                                new_kernel,
-                                                &kernel_ops,
-                                                fd,
-                                                &data_file_size));
-      }
-
-      if (!pcr_policy.empty()) {
-        TEST_AND_RETURN_FALSE(DeltaCompressFile("",
-                                                pcr_policy,
-                                                &pcr_policy_ops,
-                                                fd,
-                                                &data_file_size));
+        // Read kernel partition
+        TEST_AND_RETURN_FALSE(DeltaCompressKernel(old_kernel,
+                                                  new_kernel,
+                                                  &kernel_ops,
+                                                  fd,
+                                                  &data_file_size));
+        LOG(INFO) << "done reading kernel";
       }
 
       CheckGraph(graph);
@@ -1444,9 +1432,6 @@ bool DeltaDiffGenerator::GenerateDeltaUpdateFile(
       if (!new_kernel.empty())
         TEST_AND_RETURN_FALSE(generator.Add(new_kernel, &kernel_ops));
 
-      if (!pcr_policy.empty())
-        TEST_AND_RETURN_FALSE(generator.Add(pcr_policy, &pcr_policy_ops));
-
       data_file_size = generator.Size();
     }
   }
@@ -1463,19 +1448,10 @@ bool DeltaDiffGenerator::GenerateDeltaUpdateFile(
   manifest.set_block_size(kBlockSize);
 
   if (!new_kernel.empty()) {
-    TEST_AND_RETURN_FALSE(AddProcedureToManifest(old_kernel,
-                                                 new_kernel,
-                                                 InstallProcedure_Type_KERNEL,
-                                                 kernel_ops,
-                                                 &manifest));
-  }
-
-  if (!pcr_policy.empty()) {
-    TEST_AND_RETURN_FALSE(AddProcedureToManifest("",
-                                                 pcr_policy,
-                                                 InstallProcedure_Type_PCR_POLICY,
-                                                 pcr_policy_ops,
-                                                 &manifest));
+    TEST_AND_RETURN_FALSE(KernelProcedureToManifest(old_kernel,
+                                                    new_kernel,
+                                                    kernel_ops,
+                                                    &manifest));
   }
 
   // Reorder the data blobs with the newly ordered manifest

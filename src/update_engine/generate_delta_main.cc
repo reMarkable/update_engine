@@ -266,6 +266,15 @@ int Main(int argc, char** argv) {
                                                    &metadata_size)) {
     return 1;
   }
+
+  {
+      off_t size = 0;
+      utils::GetDeviceSize(FLAGS_out_file, &size);
+      OmahaHashCalculator hasher;
+      hasher.UpdateFile(FLAGS_out_file, size);
+      hasher.Finalize();
+      LOG(INFO) << FLAGS_out_file << ": size=" << size << " hash=" << hasher.hash();
+  }
   return 0;
 }
 

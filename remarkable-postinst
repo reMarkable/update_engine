@@ -11,7 +11,7 @@ INSTALL_DEV="$1"
 
 # use the fw_setenv binary from the image to ensure compatibility
 FW_SETENV=
-for bindir in bin/old_bins bin sbin; do
+for bindir in bin/old_bins bin sbin usr/bin; do
     if [[ -x "${INSTALL_MNT}/${bindir}/fw_setenv" ]]; then
         FW_SETENV="${INSTALL_MNT}/${bindir}/fw_setenv"
         break
@@ -23,7 +23,7 @@ if [[ -z "${FW_SETENV}" ]]; then
 fi
 
 FW_PRINTENV=
-for bindir in bin/old_bins bin sbin; do
+for bindir in bin/old_bins bin sbin usr/bin; do
     if [[ -x "${INSTALL_MNT}/${bindir}/fw_printenv" ]]; then
         FW_PRINTENV="${INSTALL_MNT}/${bindir}/fw_printenv"
         break
@@ -65,5 +65,5 @@ else
     call_fw_setenv "mmcroot" "${INSTALL_DEV}"
 fi
 
-cat "${INSTALL_MNT}/share/remarkable/release"
+cat "${INSTALL_MNT}/etc/remarkable/update.conf"
 echo "Setup ${INSTALL_LABEL} (${INSTALL_DEV}) for next boot."

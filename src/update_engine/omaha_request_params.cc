@@ -57,8 +57,11 @@ bool OmahaRequestParams::Init(bool interactive) {
   app_channel_ = GetConfValue("GROUP", kDefaultChannel);
   LOG(INFO) << "Current group set to " << app_channel_;
 
-  // TODO: deltas can only be enabled if verity is active.
-  delta_okay_ = false;
+  // deltas are only okay if the /.nodelta file does not exist.  if we don't
+  // know (i.e. stat() returns some unexpected error), then err on the side of
+  // caution and say deltas are not okay.
+  delta_okay_ = (access((root_ + "/.nodelta").c_str(), F_OK) < 0) &&
+	  (errno == ENOENT);
 
   return true;
 }

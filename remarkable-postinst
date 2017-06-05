@@ -57,12 +57,13 @@ call_fw_printenv() {
 
 call_fw_setenv "upgrade_available" "1"
 
-OLDROOT=$(call_fw_printenv -n mmcroot)
+OLDPART=$(call_fw_printenv -n active_partition)
+NEWPART="${INSTALL_DEV: -1}"
 if [[ "${OLDROOT}" == "${INSTALL_DEV}" ]]; then
     echo "WARNING: We're installing over our current root"
 else
-    call_fw_setenv "mmcfallbackroot" "${OLDROOT}"
-    call_fw_setenv "mmcroot" "${INSTALL_DEV}"
+    call_fw_setenv "fallback_partition" "${OLDPART}"
+    call_fw_setenv "active_partition" "${NEWPART}"
 fi
 
 cat "${INSTALL_MNT}/etc/remarkable/update.conf"

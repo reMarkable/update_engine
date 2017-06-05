@@ -5,9 +5,11 @@
 
 set -e
 
-bootdev=$(fw_printenv -n mmcroot)
+ACTIVEPART=$(fw_printenv -n active_partition)
+CURDEV="$(rootdev)"
+CURPART="${CURDEV: -1}"
 
-if [[ "$bootdev" == "$(rootdev)" ]]; then
+if [[ "$ACTIVEPART" == "$CURPART" ]]; then
     fw_setenv upgrade_available 0
     fw_setenv bootcount 0
 fi

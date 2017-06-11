@@ -62,6 +62,7 @@ static const char kHTTPS[] = "https://";
 static const char kBootId[] = "/proc/sys/kernel/random/boot_id";
 static const char kMachineId[] = "/etc/machine-id";
 static const char kDevImageMarker[] = "/root/.dev_mode";
+static const char kGenUuid[] = "/proc/sys/kernel/random/uuid";
 
 bool IsOfficialBuild() {
   return !files::PathExists(files::FilePath(kDevImageMarker));
@@ -96,6 +97,22 @@ string GetMachineId() {
   id = strings::TrimWhitespace(id);
 
   return id;
+}
+
+string GetUuid() {
+  string id;
+  string guid;
+  if (!files::ReadFileToString(files::FilePath(kGenUuid), &id)) {
+    LOG(ERROR) << "Unable to read new uuid";
+    return "";
+  }
+  id = strings::TrimWhitespace(id);
+
+  // Make it look like the other UUIDs in the payload
+  guid.append(1, '{');
+  guid.append(id);
+  guid.append(1, '}');
+  return guid;
 }
 
 bool WriteFile(const char* path, const char* data, int data_len) {

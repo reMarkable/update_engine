@@ -200,6 +200,8 @@ string GetRequestXml(const OmahaEvent* event,
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       "<request protocol=\"3.0\" "
                 "version=\"" + XmlEncode(kGupdateVersion) + "\" "
+                "requestid=\"" + XmlEncode(utils::GetUuid()) + "\" "
+                "sessionid=\"" + XmlEncode(params.session_uuid()) + "\" "
                 "updaterversion=\"" + XmlEncode(kGupdateVersion) + "\" " +
                 install_source +
                 "ismachine=\"1\">\n" +

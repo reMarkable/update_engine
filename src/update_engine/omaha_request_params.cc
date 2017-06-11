@@ -54,6 +54,7 @@ bool OmahaRequestParams::Init(bool interactive) {
   arch_ = GetMachineType();
   update_url_ = GetConfValue("SERVER", kProductionOmahaUrl);
   interactive_ = interactive;
+  session_uuid_ = utils::GetUuid();
 
   app_channel_ = GetConfValue("GROUP", kDefaultChannel);
   LOG(INFO) << "Current group set to " << app_channel_;

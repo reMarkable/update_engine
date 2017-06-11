@@ -158,7 +158,10 @@ string GetAppXml(const OmahaEvent* event,
                 "lang=\"" + XmlEncode(params.app_lang()) + "\" " +
                 "board=\"" + XmlEncode(params.os_board()) + "\" " +
                 "hardware_class=\"" + XmlEncode(params.hwid()) + "\" " +
-                "delta_okay=\"" + delta_okay_str + "\" "
+                "delta_okay=\"" + delta_okay_str + "\" " +
+                "nextversion=\"\" "
+                "brand=\"\" "
+                "client=\"\" "
                 ">\n" +
                    app_body +
       "    </app>\n";

@@ -150,6 +150,7 @@ string GetAppXml(const OmahaEvent* event,
       "    <app appid=\"" + XmlEncode(params.app_id()) + "\" " +
                 "version=\"" + XmlEncode(params.app_version()) + "\" " +
                 "track=\"" + XmlEncode(params.app_channel()) + "\" " +
+                "ap=\"" + XmlEncode(params.app_channel()) + "\" " +
                 "bootid=\"" + XmlEncode(params.bootid()) + "\" " +
                 "oem=\"" + XmlEncode(params.oemid()) + "\" " +
                 "oemversion=\"" + XmlEncode(params.oemversion()) + "\" " +

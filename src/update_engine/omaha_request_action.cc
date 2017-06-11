@@ -175,7 +175,8 @@ string GetOsXml(const OmahaRequestParams& params) {
   string os_xml =
       "    <os version=\"" + XmlEncode(params.os_version()) + "\" " +
                "platform=\"" + XmlEncode(params.os_platform()) + "\" " +
-               "sp=\"" + XmlEncode(params.os_sp()) + "\">"
+               "sp=\"" + XmlEncode(params.os_sp()) + "\" " +
+               "arch=\"" + XmlEncode(params.arch()) + "\">"
           "</os>\n";
   return os_xml;
 }

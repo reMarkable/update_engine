@@ -51,6 +51,7 @@ bool OmahaRequestParams::Init(bool interactive) {
   app_lang_ = "en-US";
   bootid_ = utils::GetBootId();
   machineid_ = utils::GetMachineId();
+  arch_ = GetMachineType();
   update_url_ = GetConfValue("SERVER", kProductionOmahaUrl);
   interactive_ = interactive;
 

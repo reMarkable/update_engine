@@ -50,6 +50,7 @@ class OmahaRequestParams {
                      const std::string& in_app_channel,
                      const std::string& in_hwid,
                      const std::string& in_bootid,
+                     const std::string& in_arch,
                      bool in_delta_okay,
                      bool in_interactive,
                      const std::string& in_update_url)
@@ -64,6 +65,7 @@ class OmahaRequestParams {
         app_channel_(in_app_channel),
         hwid_(in_hwid),
         bootid_(in_bootid),
+        arch_(in_arch),
         delta_okay_(in_delta_okay),
         interactive_(in_interactive),
         update_url_(in_update_url) {}
@@ -81,6 +83,7 @@ class OmahaRequestParams {
   inline std::string oemid() const { return oemid_; }
   inline std::string oemversion() const { return oemversion_; }
   inline std::string alephversion() const { return alephversion_; }
+  inline std::string arch() const { return arch_; }
 
   inline void set_app_version(const std::string& version) {
     app_version_ = version;
@@ -149,6 +152,7 @@ class OmahaRequestParams {
   std::string oemid_; // Unique machine ID that is set during installation 
   std::string oemversion_; // reMarkable version set during installation
   std::string alephversion_; // first reMarkable version cached by update_engine
+  std::string arch_; // Machine architecture
   bool delta_okay_;  // If this client can accept a delta
   bool interactive_;   // Whether this is a user-initiated update check
 

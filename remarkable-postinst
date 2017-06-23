@@ -34,6 +34,18 @@ if [[ -z "${FW_PRINTENV}" ]]; then
     exit 1
 fi
 
+WACOM_FLASH=
+for bindir in bin/old_bins bin sbin usr/bin; do
+    if [[ -x "${INSTALL_MNT}/${bindir}/wacom_flash" ]]; then
+        WACOM_FLASH="${INSTALL_MNT}/${bindir}/wacom_flash"
+        break
+    fi
+done
+if [[ -z "${WACOM_FLASH}" ]]; then
+    echo "Failed to locate the wacom_flash binary in ${INSTALL_MNT}" >&2
+
+fi
+
 # locate the dynamic linker
 LDSO=
 for l in "${INSTALL_MNT}"/lib*/ld-2.??.so; do
@@ -54,6 +66,10 @@ call_fw_setenv() {
 call_fw_printenv() {
     "${LDSO}" --library-path "${LIBS}" "${FW_PRINTENV}" -c "${INSTALL_MNT}/etc/fw_env.config" "$@"
 }
+call_wacom_flash() {
+    "${LDSO}" --library-path "${LIBS}" "${WACOM_FLASH}" "$@"
+}
+
 
 call_fw_setenv "upgrade_available" "1"
 
@@ -68,3 +84,7 @@ fi
 
 cat "${INSTALL_MNT}/etc/remarkable/update.conf"
 echo "Setup ${INSTALL_LABEL} (${INSTALL_DEV}) for next boot."
+
+if [[ -n "${WACOM_FLASH}" ]] && [[ -r "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" ]]; then
+    call_wacom_flash "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" "0" "i2c-1"
+fi

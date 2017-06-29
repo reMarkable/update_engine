@@ -82,7 +82,7 @@ else
     call_fw_setenv "active_partition" "${NEWPART}"
 fi
 
-cat "${INSTALL_MNT}/etc/remarkable/update.conf"
+cat "${INSTALL_MNT}/usr/share/remarkable/update.conf"
 echo "Setup ${INSTALL_LABEL} (${INSTALL_DEV}) for next boot."
 
 if [[ -n "${WACOM_FLASH}" ]] && [[ -r "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" ]]; then

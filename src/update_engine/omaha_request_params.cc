@@ -90,7 +90,7 @@ string OmahaRequestParams::SearchConfValue(const vector<string>& files,
 string OmahaRequestParams::GetConfValue(const string& key,
                                         const string& default_value) const {
   vector<string> files;
-  files.push_back("/etc/remarkable/update.conf");
+  files.push_back("/etc/remarkable.conf");
   files.push_back("/usr/share/remarkable/update.conf");
   files.push_back("/usr/share/remarkable/release");
   return SearchConfValue(files, key, default_value);

@@ -94,11 +94,11 @@ TEST_F(OmahaResponseHandlerActionTest, SimpleTest) {
     in.prompt = false;
     in.deadline = "20101020";
     InstallPlan install_plan;
-    EXPECT_TRUE(DoTest(in, "/dev/sda3", &install_plan));
+    EXPECT_TRUE(DoTest(in, "/dev/sda2", &install_plan));
     EXPECT_EQ(in.payload_urls[0], install_plan.download_url);
     EXPECT_EQ(in.hash, install_plan.payload_hash);
     EXPECT_EQ(in.display_version, install_plan.display_version);
-    EXPECT_EQ("/dev/sda4", install_plan.partition_path);
+    EXPECT_EQ("/dev/sda3", install_plan.partition_path);
     string deadline;
     EXPECT_TRUE(utils::ReadFile(
         OmahaResponseHandlerAction::kDeadlineFile,
@@ -121,11 +121,11 @@ TEST_F(OmahaResponseHandlerActionTest, SimpleTest) {
     in.needs_admin = true;
     in.prompt = true;
     InstallPlan install_plan;
-    EXPECT_TRUE(DoTest(in, "/dev/sda4", &install_plan));
+    EXPECT_TRUE(DoTest(in, "/dev/sda3", &install_plan));
     EXPECT_EQ(in.payload_urls[0], install_plan.download_url);
     EXPECT_EQ(in.hash, install_plan.payload_hash);
     EXPECT_EQ(in.display_version, install_plan.display_version);
-    EXPECT_EQ("/dev/sda3", install_plan.partition_path);
+    EXPECT_EQ("/dev/sda2", install_plan.partition_path);
     string deadline;
     EXPECT_TRUE(utils::ReadFile(
         OmahaResponseHandlerAction::kDeadlineFile,
@@ -143,11 +143,11 @@ TEST_F(OmahaResponseHandlerActionTest, SimpleTest) {
     in.prompt = true;
     in.deadline = "some-deadline";
     InstallPlan install_plan;
-    EXPECT_TRUE(DoTest(in, "/dev/sda3", &install_plan));
+    EXPECT_TRUE(DoTest(in, "/dev/sda2", &install_plan));
     EXPECT_EQ(in.payload_urls[0], install_plan.download_url);
     EXPECT_EQ(in.hash, install_plan.payload_hash);
     EXPECT_EQ(in.display_version, install_plan.display_version);
-    EXPECT_EQ("/dev/sda4", install_plan.partition_path);
+    EXPECT_EQ("/dev/sda3", install_plan.partition_path);
     string deadline;
     EXPECT_TRUE(utils::ReadFile(
         OmahaResponseHandlerAction::kDeadlineFile,

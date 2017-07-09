@@ -62,8 +62,10 @@ bool OmahaRequestParams::Init(bool interactive) {
   // deltas are only okay if the /.nodelta file does not exist.  if we don't
   // know (i.e. stat() returns some unexpected error), then err on the side of
   // caution and say deltas are not okay.
-  delta_okay_ = (access((root_ + "/.nodelta").c_str(), F_OK) < 0) &&
-	  (errno == ENOENT);
+  // FIXME: re-enable this when we switch to read-only roots
+//  delta_okay_ = (access((root_ + "/.nodelta").c_str(), F_OK) < 0) &&
+//	  (errno == ENOENT);
+  delta_okay_ = false;
 
   return true;
 }

@@ -52,6 +52,8 @@ OmahaRequestParams kDefaultTestParams(
     "unittest",
     "OEM MODEL 09235 7471",
     "{8DA4B84F-2864-447D-84B7-C2D9B72924E7}",
+    "x86-generic", // architecture
+    "{88DC1453-ABB2-45F5-A622-1808F18E1B61}", // session uuid
     false,  // delta okay
     false,  // interactive
     "http://url");
@@ -442,6 +444,8 @@ TEST(OmahaRequestActionTest, XmlEncodeTest) {
                             "unittest_track&lt;",
                             "<OEM MODEL>",
                             "{8DA4B84F-2864-447D-84B7-C2D9B72924E7}",
+                            "x86-generic", // architecture
+                            "{88DC1453-ABB2-45F5-A622-1808F18E1B61}", // session uuid
                             false,  // delta okay
                             false,  // interactive
                             "http://url");
@@ -622,6 +626,8 @@ TEST(OmahaRequestActionTest, FormatDeltaOkayOutputTest) {
                               "unittest_track",
                               "OEM MODEL REV 1234",
                               "{88DC1453-ABB2-45F5-A622-1808F18E1B61}",
+                              "x86-generic", // architecture
+                              "{88DC1453-ABB2-45F5-A622-1808F18E1B61}", // session uuid
                               delta_okay,
                               false,  // interactive
                               "http://url");
@@ -658,6 +664,8 @@ TEST(OmahaRequestActionTest, FormatInteractiveOutputTest) {
                               "unittest_track",
                               "OEM MODEL REV 1234",
                               "{88DC1453-ABB2-45F5-A622-1808F18E1B61}",
+                              "x86-generic", // architecture
+                              "{88DC1453-ABB2-45F5-A622-1808F18E1B61}", // session uuid
                               true,  // delta_okay
                               interactive,
                               "http://url");

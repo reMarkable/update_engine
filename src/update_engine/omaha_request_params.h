@@ -30,6 +30,8 @@ class SystemState;
 // reflect its lifetime more appropriately.
 class OmahaRequestParams {
  public:
+  OmahaRequestParams() = delete;
+
   OmahaRequestParams(SystemState* system_state)
       : system_state_(system_state),
         os_platform_(kOsPlatform),

@@ -131,7 +131,7 @@ libupdate_engine_a_SOURCES = \
 	src/update_engine/update_metadata.pb.cc \
 	src/update_engine/utils.cc
 
-update_engine_unittests_LDADD = libupdate_engine.a \
+update_engine_unittests_LDADD = libupdate_engine.a librootdev.a \
 				-lgtest -lgmock $(LDADD)
 update_engine_unittests_SOURCES = \
 	src/update_engine/testrunner.cc \

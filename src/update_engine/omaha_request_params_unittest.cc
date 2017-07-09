@@ -31,8 +31,7 @@ class OmahaRequestParamsTest : public ::testing::Test {
     ASSERT_EQ(0, System(string("mkdir -p ") + kTestDir + "/usr/share/remarkable"));
     // Create a fresh copy of the params for each test, so there's no
     // unintended reuse of state across tests.
-    MockSystemState mock_system_state;
-    OmahaRequestParams new_params(&mock_system_state);
+    OmahaRequestParams new_params(&mock_system_state_);
     params_ = new_params;
     params_.set_root(string("./") + kTestDir);
   }
@@ -42,6 +41,7 @@ class OmahaRequestParamsTest : public ::testing::Test {
   }
 
   OmahaRequestParams params_;
+  MockSystemState mock_system_state_;
 
   static const string kTestDir;
 };
@@ -80,7 +80,7 @@ TEST_F(OmahaRequestParamsTest, SimpleTest) {
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
   EXPECT_EQ(string("0.2.2.3_") + GetMachineType(), out.os_sp());
-  EXPECT_EQ("{e96281a6-d1af-4bde-9a0a-97b76e56dc57}", out.app_id());
+  EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
   EXPECT_EQ("0.2.2.3", out.app_version());
   EXPECT_EQ("en-US", out.app_lang());
   EXPECT_EQ("", out.hwid());
@@ -120,7 +120,7 @@ TEST_F(OmahaRequestParamsTest, MissingChannelTest) {
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
   EXPECT_EQ(string("0.2.2.3_") + GetMachineType(), out.os_sp());
-  EXPECT_EQ("{e96281a6-d1af-4bde-9a0a-97b76e56dc57}", out.app_id());
+  EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
   EXPECT_EQ("0.2.2.3", out.app_version());
   EXPECT_EQ("en-US", out.app_lang());
   EXPECT_EQ("stable", out.app_channel());
@@ -136,7 +136,7 @@ TEST_F(OmahaRequestParamsTest, ConfusingReleaseTest) {
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
   EXPECT_EQ(string("0.2.2.3_") + GetMachineType(), out.os_sp());
-  EXPECT_EQ("{e96281a6-d1af-4bde-9a0a-97b76e56dc57}", out.app_id());
+  EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
   EXPECT_EQ("0.2.2.3", out.app_version());
   EXPECT_EQ("en-US", out.app_lang());
   EXPECT_EQ("stable", out.app_channel());
@@ -151,7 +151,7 @@ TEST_F(OmahaRequestParamsTest, MissingVersionTest) {
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
   EXPECT_EQ(string("_") + GetMachineType(), out.os_sp());
-  EXPECT_EQ("{e96281a6-d1af-4bde-9a0a-97b76e56dc57}", out.app_id());
+  EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
   EXPECT_EQ("", out.app_version());
   EXPECT_EQ("en-US", out.app_lang());
   EXPECT_FALSE(out.delta_okay());
@@ -168,7 +168,7 @@ TEST_F(OmahaRequestParamsTest, MissingURLTest) {
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
   EXPECT_EQ(string("0.2.2.3_") + GetMachineType(), out.os_sp());
-  EXPECT_EQ("{e96281a6-d1af-4bde-9a0a-97b76e56dc57}", out.app_id());
+  EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
   EXPECT_EQ("0.2.2.3", out.app_version());
   EXPECT_EQ("en-US", out.app_lang());
   EXPECT_FALSE(out.delta_okay());
@@ -187,7 +187,7 @@ TEST_F(OmahaRequestParamsTest, ValidChannelTest) {
   OmahaRequestParams out(&mock_system_state);
   EXPECT_TRUE(DoTest(&out));
   EXPECT_EQ(string("0.2.2.3_") + GetMachineType(), out.os_sp());
-  EXPECT_EQ("{e96281a6-d1af-4bde-9a0a-97b76e56dc57}", out.app_id());
+  EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
   EXPECT_EQ("0.2.2.3", out.app_version());
   EXPECT_EQ("en-US", out.app_lang());
   EXPECT_EQ("", out.hwid());

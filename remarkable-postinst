@@ -55,6 +55,11 @@ call_fw_printenv() {
     "${LDSO}" --library-path "${LIBS}" "${FW_PRINTENV}" -c "${INSTALL_MNT}/etc/fw_env.config" "$@"
 }
 
+# fw_setenv doesn't work if the file isn't there
+if [[ ! -e /var/lib/uboot/uboot.env ]]; then
+    dd if=/dev/zero of=/var/lib/uboot/uboot.env count=1024
+fi
+
 call_fw_setenv "upgrade_available" "1"
 
 OLDPART=$(call_fw_printenv -n active_partition)

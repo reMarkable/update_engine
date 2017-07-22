@@ -273,7 +273,20 @@ int Main(int argc, char** argv) {
       OmahaHashCalculator hasher;
       hasher.UpdateFile(FLAGS_out_file, size);
       hasher.Finalize();
-      LOG(INFO) << FLAGS_out_file << ": size=" << size << " hash=" << hasher.hash();
+    /*
+     {
+      "IsDeltaPayload":"false",
+      "sha256":"1S8JlHs3qgk3xBGmRg5gmR+uDXJyhhzbOOG+JJ4XlAY=",
+      "DisablePayloadBackoff":"true"
+     }
+     */
+      LOG(INFO) << FLAGS_out_file << ": size=" << size;
+      LOG(INFO) << "\n"
+          "{\n"
+          "  \"IsDeltaPayload\": \"false\",\n"
+          "  \"sha256\": \"" << hasher.hash() << "\",\n"
+          "  \"DisablePayloadBackoff\": \"true\"\n"
+          "}\n";
   }
   return 0;
 }

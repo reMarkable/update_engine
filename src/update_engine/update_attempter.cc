@@ -469,6 +469,15 @@ bool UpdateAttempter::GetStatus(int64_t* last_checked_time,
 }
 
 void UpdateAttempter::UpdateBootFlags() {
+  LOG(INFO) << "Not updating boot flags, we don't know the state of the application.";
+
+  update_boot_flags_running_ = false;
+  updated_boot_flags_ = true;
+  if (start_action_processor_) {
+    ScheduleProcessingStart();
+  }
+  return;
+
   if (update_boot_flags_running_) {
     LOG(INFO) << "Update boot flags running, nothing to do.";
     return;
@@ -492,11 +501,6 @@ void UpdateAttempter::UpdateBootFlags() {
 }
 
 void UpdateAttempter::CompleteUpdateBootFlags(int return_code) {
-  update_boot_flags_running_ = false;
-  updated_boot_flags_ = true;
-  if (start_action_processor_) {
-    ScheduleProcessingStart();
-  }
 }
 
 void UpdateAttempter::StaticCompleteUpdateBootFlags(

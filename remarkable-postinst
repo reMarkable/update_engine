@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (c) 2017 reMarkable AS
 # Copyright (c) 2014 The CoreOS Authors.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -79,7 +80,7 @@ rm -f /var/lib/uboot/fsck*.rec
 
 
 # fw_setenv doesn't work if the file isn't there
-if [[ ! -e /var/lib/uboot/uboot.env ]]; then
+if [[ ! -s /var/lib/uboot/uboot.env ]]; then
     dd if=/dev/zero of=/var/lib/uboot/uboot.env count=1024
 fi
 
@@ -87,6 +88,7 @@ call_fw_setenv "upgrade_available" "1"
 
 OLDPART=$(call_fw_printenv -n active_partition)
 NEWPART="${INSTALL_DEV: -1}"
+
 if [[ "${OLDROOT}" == "${INSTALL_DEV}" ]]; then
     echo "WARNING: We're installing over our current root"
 else
@@ -100,3 +102,4 @@ echo "Setup ${INSTALL_LABEL} (${INSTALL_DEV}) for next boot."
 if [[ -n "${WACOM_FLASH}" ]] && [[ -r "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" ]]; then
     call_wacom_flash "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" "0" "i2c-1"
 fi
+

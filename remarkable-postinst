@@ -70,6 +70,13 @@ call_wacom_flash() {
     "${LDSO}" --library-path "${LIBS}" "${WACOM_FLASH}" "$@"
 }
 
+umount /var/lib/uboot/
+
+${INSTALL_MNT}/sbin/fsck.vfat -a /dev/mmcblk1p1 || true
+
+mount /var/lib/uboot/
+rm -f /var/lib/uboot/fsck*.rec
+
 
 # fw_setenv doesn't work if the file isn't there
 if [[ ! -e /var/lib/uboot/uboot.env ]]; then

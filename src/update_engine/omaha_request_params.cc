@@ -56,7 +56,11 @@ bool OmahaRequestParams::Init(bool interactive) {
   interactive_ = interactive;
   session_uuid_ = utils::GetUuid();
 
-  app_channel_ = GetConfValue("GROUP", kDefaultChannel);
+  app_channel_ = GetConfValue("ServiceEnvironment", "");
+  if (app_channel_ == "") {
+      app_channel_ = GetConfValue("GROUP", kDefaultChannel);
+  }
+
   LOG(INFO) << "Current group set to " << app_channel_;
 
   // deltas are only okay if the /.nodelta file does not exist.  if we don't

@@ -85,6 +85,7 @@ if [[ ! -s /var/lib/uboot/uboot.env ]]; then
 fi
 
 call_fw_setenv "upgrade_available" "1"
+call_fw_setenv "bootcount" "0"
 
 OLDPART=$(call_fw_printenv -n active_partition)
 NEWPART="${INSTALL_DEV: -1}"

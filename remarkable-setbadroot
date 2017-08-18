@@ -1,0 +1,19 @@
+#!/bin/bash
+# Copyright (c) 2014 The CoreOS Authors.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+set -e
+
+ACTIVEPART=$(fw_printenv -n active_partition)
+CURDEV="$(rootdev)"
+CURPART="${CURDEV: -1}"
+
+if [[ "$ACTIVEPART" == "$CURPART" ]]; then
+    fw_setenv upgrade_available 1
+    fw_setenv bootcount 1
+    exit 0
+else
+    exit 1
+fi
+

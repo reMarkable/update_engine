@@ -12,4 +12,10 @@ CURPART="${CURDEV: -1}"
 if [[ "$ACTIVEPART" == "$CURPART" ]]; then
     fw_setenv upgrade_available 0
     fw_setenv bootcount 0
+else
+    # We are currently running happily, so don't try the old one until we try an update again
+    fw_setenv fallback_partition $ACTIVEPART
+    fw_setenv active_partition $CURPART
+    fw_setenv upgrade_available 0
+    fw_setenv bootcount 0
 fi

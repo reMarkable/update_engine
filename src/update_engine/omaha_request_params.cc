@@ -28,7 +28,7 @@ namespace chromeos_update_engine {
 const char* const OmahaRequestParams::kAppId(
     "{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}");
 const char* const OmahaRequestParams::kOsPlatform("reMarkable");
-const char* const OmahaRequestParams::kOsVersion("ZeroGravitas");
+const char* const OmahaRequestParams::kOsVersion("zg");
 const char* const OmahaRequestParams::kDefaultChannel("stable");
 const char* const kProductionOmahaUrl(
     "https://updates.cloud.remarkable.engineering/service/update2");

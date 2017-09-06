@@ -36,7 +36,7 @@ const char* const kProductionOmahaUrl(
 bool OmahaRequestParams::Init(bool interactive) {
   os_platform_ = OmahaRequestParams::kOsPlatform;
   os_version_ = OmahaRequestParams::kOsVersion;
-  oemid_ = GetOemValue("ID", "");
+  oemid_ = GetConfValue("deviceid", "");
   oemversion_ = GetOemValue("VERSION_ID", "");
   app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");
 

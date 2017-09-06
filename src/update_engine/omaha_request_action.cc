@@ -203,7 +203,6 @@ string GetRequestXml(const OmahaEvent* event,
                 "version=\"" + XmlEncode(params.app_version()) + "\" "
                 "requestid=\"" + XmlEncode(utils::GetUuid()) + "\" "
                 "sessionid=\"" + XmlEncode(params.session_uuid()) + "\" "
-                "userid=\"" + XmlEncode(params.oemversion()) + "\" "
                 "updaterversion=\"" + XmlEncode(kGupdateVersion) + "\" " +
                 install_source +
                 "ismachine=\"1\">\n" +

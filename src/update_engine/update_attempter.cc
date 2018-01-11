@@ -460,11 +460,21 @@ bool UpdateAttempter::GetStatus(int64_t* last_checked_time,
                                 string* current_operation,
                                 string* new_version,
                                 int64_t* new_payload_size) {
-  *last_checked_time = last_checked_time_;
-  *progress = download_progress_;
-  *current_operation = UpdateStatusToString(status_);
-  *new_version = new_version_;
-  *new_payload_size = new_payload_size_;
+  if (last_checked_time) {
+    *last_checked_time = last_checked_time_;
+  }
+  if (progress) {
+    *progress = download_progress_;
+  }
+  if (current_operation) {
+    *current_operation = UpdateStatusToString(status_);
+  }
+  if (new_version) {
+    *new_version = new_version_;
+  }
+  if (new_payload_size) {
+    *new_payload_size = new_payload_size_;
+  }
   return true;
 }
 
@@ -701,3 +711,5 @@ void UpdateAttempter::PingOmaha() {
 }
 
 }  // namespace chromeos_update_engine
+
+/* vim: set ts=2 sw=2 tw=0 expandtab cindent softtabstop=2 :*/

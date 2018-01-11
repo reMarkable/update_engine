@@ -21,6 +21,7 @@
 #include "update_engine/payload_state_interface.h"
 #include "update_engine/prefs_interface.h"
 #include "update_engine/utils.h"
+#include "update_engine/update_attempter.h"
 
 using std::string;
 using strings::StringPrintf;
@@ -146,6 +147,10 @@ string GetAppXml(const OmahaEvent* event,
 
   string delta_okay_str = params.delta_okay() ? "true" : "false";
 
+  UpdateAttempter *update_attempter = system_state->update_attempter();
+  string next_version;
+  update_attempter->GetStatus(nullptr, nullptr, nullptr, &next_version, nullptr);
+
   string app_xml =
       "    <app appid=\"" + XmlEncode(params.app_id()) + "\" " +
                 "version=\"" + XmlEncode(params.app_version()) + "\" " +
@@ -160,7 +165,7 @@ string GetAppXml(const OmahaEvent* event,
                 "board=\"" + XmlEncode(params.os_board()) + "\" " +
                 "hardware_class=\"" + XmlEncode(params.hwid()) + "\" " +
                 "delta_okay=\"" + delta_okay_str + "\" " +
-                "nextversion=\"\" "
+                "nextversion=\"" + XmlEncode(next_version) + "\" "
                 "brand=\"\" "
                 "client=\"\" "
                 ">\n" +

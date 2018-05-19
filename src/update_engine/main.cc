@@ -5,21 +5,26 @@
 #include <gflags/gflags.h>
 #include <glib.h>
 #include <glog/logging.h>
+#include <core/dbus/dbus.h>
+#include <core/dbus/asio/executor.h>
+#include <core/dbus/service.h>
 
-#include "update_engine/certificate_checker.h"
-#include "update_engine/dbus_constants.h"
-#include "update_engine/dbus_interface.h"
-#include "update_engine/dbus_service.h"
-#include "update_engine/real_system_state.h"
-#include "update_engine/subprocess.h"
-#include "update_engine/terminator.h"
-#include "update_engine/update_attempter.h"
-#include "update_engine/update_check_scheduler.h"
-#include "update_engine/utils.h"
+#include "src/update_engine/certificate_checker.h"
+#include "src/update_engine/dbus_constants.h"
+#include "src/update_engine/dbus_interface.h"
+#include "src/update_engine/dbus_service.h"
+#include "src/update_engine/real_system_state.h"
+#include "src/update_engine/subprocess.h"
+#include "src/update_engine/terminator.h"
+#include "src/update_engine/update_attempter.h"
+#include "src/update_engine/update_check_scheduler.h"
+#include "src/update_engine/utils.h"
 
 extern "C" {
-#include "update_engine/update_engine.dbusserver.h"
+#include "src/update_engine/update_engine.dbusserver.h"
 }
+
+namespace dbus = core::dbus;
 
 DEFINE_bool(foreground, false,
             "Don't daemon()ize; run in foreground.");
@@ -37,41 +42,7 @@ gboolean BroadcastStatus(void* arg) {
   return FALSE;  // Don't call this callback again
 }
 
-namespace {
-
-void SetupDbusService(UpdateEngineService* service) {
-  DBusGConnection *bus;
-  DBusGProxy *proxy;
-  GError *error = NULL;
-
-  bus = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
-  LOG_IF(FATAL, !bus) << "Failed to get bus: "
-                      << utils::GetAndFreeGError(&error);
-  proxy = dbus_g_proxy_new_for_name(bus,
-                                    DBUS_SERVICE_DBUS,
-                                    DBUS_PATH_DBUS,
-                                    DBUS_INTERFACE_DBUS);
-  guint32 request_name_ret;
-  if (!org_freedesktop_DBus_request_name(proxy,
-                                         kUpdateEngineServiceName,
-                                         0,
-                                         &request_name_ret,
-                                         &error)) {
-    LOG(FATAL) << "Failed to get name: " << utils::GetAndFreeGError(&error);
-  }
-  if (request_name_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
-    g_warning("Got result code %u from requesting name", request_name_ret);
-    LOG(FATAL) << "Got result code " << request_name_ret
-               << " from requesting name, but expected "
-               << DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER;
-  }
-  dbus_g_connection_register_g_object(bus,
-                                      "/no/remarkable/update1",
-                                      G_OBJECT(service));
 }
-
-}  // namespace {}
-}  // namespace chromeos_update_engine
 
 int main(int argc, char** argv) {
   // Disable glog's default behavior of logging to files.
@@ -79,7 +50,6 @@ int main(int argc, char** argv) {
   GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
 
-  dbus_threads_init_default();
   chromeos_update_engine::Terminator::Init();
   chromeos_update_engine::Subprocess::Init();
 
@@ -111,14 +81,39 @@ int main(int argc, char** argv) {
   chromeos_update_engine::CertificateChecker::set_openssl_wrapper(
       &openssl_wrapper);
 
-  // Create the dbus service object:
-  dbus_g_object_type_install_info(UPDATE_ENGINE_TYPE_SERVICE,
-                                  &dbus_glib_update_engine_service_object_info);
-  UpdateEngineService* service =
-      UPDATE_ENGINE_SERVICE(g_object_new(UPDATE_ENGINE_TYPE_SERVICE, NULL));
-  service->system_state_ = &real_system_state;
-  update_attempter->set_dbus_service(service);
-  chromeos_update_engine::SetupDbusService(service);
+
+  dbus::Bus::Ptr bus = std::make_shared<dbus::Bus>(dbus::WellKnownBus::session);
+  bus->install_executor(core::dbus::asio::make_executor(bus));
+  std::thread t {std::bind(&dbus::Bus::run, bus)};
+
+  dbus::Service::Ptr service = dbus::Service::add_service<Manager>(bus);
+  CHECK(service);
+
+  dbus::Object::Ptr object = service->add_object_for_path(dbus::types::ObjectPath(chromeos_update_engine::kUpdateEngineServicePath));
+  CHECK(object);
+
+  object->install_method_handler<Manager::AttemptUpdate>([=](const dbus::Message::Ptr&) {
+      update_attempter->CheckForUpdate(true);
+  });
+  object->install_method_handler<Manager::ResetStatus>([=](const dbus::Message::Ptr&) {
+      update_attempter->ResetStatus();
+  });
+  object->install_method_handler<Manager::GetStatus>([=](const dbus::Message::Ptr &m) {
+      int64_t last_checked_time;
+      double progress;
+      std::string current_operation;
+      std::string new_version;
+      int64_t new_size;
+      update_attempter->GetStatus(&last_checked_time, &progress, &current_operation, &new_version, &new_size);
+
+      dbus::Message::Ptr reply = dbus::Message::make_method_return(m);
+      reply->writer() << last_checked_time
+                      << progress
+                      << current_operation
+                      << new_version
+                      << new_size;
+      bus->send(reply);
+  });
 
   // Schedule periodic update checks.
   chromeos_update_engine::UpdateCheckScheduler scheduler(update_attempter,
@@ -139,8 +134,8 @@ int main(int argc, char** argv) {
 
   // Cleanup:
   g_main_loop_unref(loop);
-  update_attempter->set_dbus_service(NULL);
-  g_object_unref(G_OBJECT(service));
+//  update_attempter->set_dbus_service(NULL);
+//  g_object_unref(G_OBJECT(service));
 
   LOG(INFO) << "reMarkable Update Engine terminating";
   return 0;

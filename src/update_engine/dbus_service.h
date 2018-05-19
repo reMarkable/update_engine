@@ -10,8 +10,39 @@
 #include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <glib-object.h>
+#include <core/dbus/dbus.h>
+#include "src/update_engine/dbus_constants.h"
 
-#include "update_engine/update_attempter.h"
+#include "src/update_engine/update_attempter.h"
+
+struct Manager {
+    struct AttemptUpdate {
+        typedef Manager Interface;
+        inline static const std::string name() {
+            return "AttemptUpdate";
+        }
+    };
+    struct ResetStatus {
+        typedef Manager Interface;
+        inline static const std::string name() {
+            return "ResetStatus";
+        }
+    };
+    struct GetStatus {
+        typedef Manager Interface;
+        inline static const std::string name() {
+            return "GetStatus";
+        }
+    };
+};
+
+namespace core { namespace dbus { namespace traits {
+template<> struct Service<Manager> {
+    inline static const std::string interface_name() {
+        return chromeos_update_engine::kUpdateEngineServiceInterface;
+    }
+};
+}}}
 
 // Type macros:
 #define UPDATE_ENGINE_TYPE_SERVICE (update_engine_service_get_type())

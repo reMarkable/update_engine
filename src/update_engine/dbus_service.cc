@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "update_engine/dbus_service.h"
+#include "src/update_engine/dbus_service.h"
 
 #include <string>
 
 #include <glog/logging.h>
 
-#include "update_engine/marshal.glibmarshal.h"
-#include "update_engine/omaha_request_params.h"
-#include "update_engine/utils.h"
+#include "src/update_engine/marshal.glibmarshal.h"
+#include "src/update_engine/omaha_request_params.h"
+#include "src/update_engine/utils.h"
 
 using std::string;
 

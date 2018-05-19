@@ -8,7 +8,7 @@ check_DATA =
 CLEANFILES = $(BUILT_SOURCES) $(check_DATA)
 EXTRA_DIST =
 
-AM_CPPFLAGS = -I$(srcdir)/src -I$(builddir)/src
+AM_CPPFLAGS = -I$(srcdir)/src -I$(builddir)/src -fexceptions
 AM_CFLAGS = -fno-exceptions \
 	    -fno-strict-aliasing \
 	    -Wall \
@@ -21,6 +21,7 @@ AM_CFLAGS = -fno-exceptions \
 	    -Wuninitialized \
 	    -D__STDC_FORMAT_MACROS=1 \
 	    -D_FILE_OFFSET_BITS=64 \
+		-fexceptions \
 	    $(GLIB_CFLAGS) $(DEPS_CFLAGS)
 AM_CXXFLAGS = $(AM_CFLAGS) -std=gnu++11
 LDADD = $(GLIB_LIBS) $(DEPS_LIBS)
@@ -63,7 +64,7 @@ librootdev_a_LDFLAGS = -export-symbols-regex '^rootdev_' \
 rootdev_SOURCES = src/rootdev/main.c
 rootdev_LDADD = librootdev.a
 
-update_engine_LDADD = libupdate_engine.a librootdev.a $(LDADD)
+update_engine_LDADD = libupdate_engine.a librootdev.a -ldbus-cpp $(LDADD)
 update_engine_SOURCES = src/update_engine/main.cc
 
 delta_generator_LDADD = libupdate_engine.a librootdev.a $(LDADD)

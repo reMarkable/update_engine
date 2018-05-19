@@ -7,6 +7,7 @@
 #include <inttypes.h>
 
 #include <memory>
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -225,7 +226,8 @@ string GetRequestXml(const OmahaEvent* event,
 string XmlEncode(const string& input) {
   std::unique_ptr<xmlChar, ScopedPtrXmlFree> str(
       xmlEncodeEntitiesReentrant(NULL, ConstXMLStr(input.c_str())));
-  return string(reinterpret_cast<const char *>(str.get()));
+  string encoded(reinterpret_cast<const char *>(str.get()));
+  return regex_replace(encoded, std::regex("\""), "\\\"");
 }
 
 OmahaRequestAction::OmahaRequestAction(SystemState* system_state,

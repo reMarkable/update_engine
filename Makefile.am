@@ -44,8 +44,7 @@ endif
 
 sbin_SCRIPTS = remarkable-postinst \
 	       remarkable-setgoodroot \
-	       remarkable-setbadroot \
-	       systemd/update_engine_stub
+	       remarkable-setbadroot
 
 noinst_LIBRARIES = libupdate_engine.a librootdev.a
 

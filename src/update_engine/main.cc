@@ -20,10 +20,6 @@
 #include "src/update_engine/update_check_scheduler.h"
 #include "src/update_engine/utils.h"
 
-extern "C" {
-#include "src/update_engine/update_engine.dbusserver.h"
-}
-
 namespace dbus = core::dbus;
 
 DEFINE_bool(foreground, false,

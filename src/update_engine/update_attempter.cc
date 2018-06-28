@@ -97,11 +97,10 @@ ActionExitCode GetErrorCodeForAction(AbstractAction* action,
   return code;
 }
 
-UpdateAttempter::UpdateAttempter(SystemState* system_state,
-                                 DbusGlibInterface* dbus_iface)
+UpdateAttempter::UpdateAttempter(SystemState* system_state)
     : processor_(new ActionProcessor()),
       system_state_(system_state),
-      dbus_service_(NULL),
+      dbus_service_(nullptr),
       update_check_scheduler_(NULL),
       fake_update_success_(false),
       http_response_code_(0),
@@ -525,13 +524,16 @@ void UpdateAttempter::BroadcastStatus() {
     return;
   }
   last_notify_time_ = steady_clock::now();
-  update_engine_service_emit_status_update(
-      dbus_service_,
+
+  dbus_service_->emit_signal<
+    Manager::Signals::UpdateStatus,
+    Manager::Signals::UpdateStatus::ArgumentType>({
       last_checked_time_,
       download_progress_,
       UpdateStatusToString(status_),
       new_version_.c_str(),
-      new_payload_size_);
+      new_payload_size_
+      });
 }
 
 uint32_t UpdateAttempter::GetErrorCodeFlags()  {

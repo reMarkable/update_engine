@@ -22,7 +22,7 @@ bool RealSystemState::Initialize() {
     return false;
 
   // Create the update attempter.
-  update_attempter_.reset(new UpdateAttempter(this, &dbus_));
+  update_attempter_.reset(new UpdateAttempter(this));
 
   // All is well. Initialization successful.
   return true;

@@ -14,6 +14,7 @@
 
 #include <glib.h>
 #include <gtest/gtest_prod.h>  // for FRIEND_TEST
+#include <core/dbus/object.h>
 
 #include "update_engine/action_processor.h"
 #include "update_engine/dbus_interface.h"
@@ -54,8 +55,7 @@ class UpdateAttempter : public ActionProcessorDelegate,
  public:
   static const int kMaxDeltaUpdateFailures;
 
-  UpdateAttempter(SystemState* system_state,
-                  DbusGlibInterface* dbus_iface);
+  UpdateAttempter(SystemState* system_state);
   virtual ~UpdateAttempter() = default;
 
   // Checks for update and, if a newer version is available, attempts to update
@@ -101,7 +101,7 @@ class UpdateAttempter : public ActionProcessorDelegate,
   int http_response_code() const { return http_response_code_; }
   void set_http_response_code(int code) { http_response_code_ = code; }
 
-  void set_dbus_service(struct UpdateEngineService* dbus_service) {
+  void set_dbus_service(const core::dbus::Object::Ptr &dbus_service) {
     dbus_service_ = dbus_service;
   }
 
@@ -212,7 +212,7 @@ class UpdateAttempter : public ActionProcessorDelegate,
 
   // If non-null, this UpdateAttempter will send status updates over this
   // dbus service.
-  UpdateEngineService* dbus_service_;
+  core::dbus::Object::Ptr dbus_service_;
 
   // Pointer to the OmahaResponseHandlerAction in the actions_ vector.
   std::shared_ptr<OmahaResponseHandlerAction> response_handler_action_;

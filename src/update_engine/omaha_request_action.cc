@@ -227,7 +227,7 @@ string XmlEncode(const string& input) {
   std::unique_ptr<xmlChar, ScopedPtrXmlFree> str(
       xmlEncodeEntitiesReentrant(NULL, ConstXMLStr(input.c_str())));
   string encoded(reinterpret_cast<const char *>(str.get()));
-  return regex_replace(encoded, std::regex("\""), "\\\"");
+  return regex_replace(encoded, std::regex("\""), "&quot;");
 }
 
 OmahaRequestAction::OmahaRequestAction(SystemState* system_state,

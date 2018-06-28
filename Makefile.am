@@ -71,7 +71,7 @@ delta_generator_LDADD = libupdate_engine.a librootdev.a $(LDADD)
 delta_generator_SOURCES = src/update_engine/generate_delta_main.cc
 
 update_engine_client_LDADD = libupdate_engine.a librootdev.a $(LDADD)
-update_engine_client_SOURCES = src/update_engine/update_engine_client.cc
+update_engine_client_SOURCES = src/update_engine/update_engine_client.cc src/update_engine/marshal.glibmarshal.c
 
 libupdate_engine_a_SOURCES = \
 	src/files/file_enumerator.cc \
@@ -90,7 +90,6 @@ libupdate_engine_a_SOURCES = \
 	src/update_engine/bzip_extent_writer.cc \
 	src/update_engine/certificate_checker.cc \
 	src/update_engine/cycle_breaker.cc \
-	src/update_engine/dbus_service.cc \
 	src/update_engine/delta_diff_generator.cc \
 	src/update_engine/delta_metadata.cc \
 	src/update_engine/delta_performer.cc \
@@ -110,7 +109,6 @@ libupdate_engine_a_SOURCES = \
 	src/update_engine/kernel_copier_action.cc \
 	src/update_engine/kernel_verifier_action.cc \
 	src/update_engine/libcurl_http_fetcher.cc \
-	src/update_engine/marshal.glibmarshal.c \
 	src/update_engine/multi_range_http_fetcher.cc \
 	src/update_engine/omaha_hash_calculator.cc \
 	src/update_engine/omaha_request_action.cc \
@@ -204,16 +202,10 @@ BUILT_SOURCES += src/update_engine/marshal.glibmarshal.c \
 	    --prefix=update_engine $< > $@
 
 EXTRA_DIST += src/update_engine/update_engine.xml
-BUILT_SOURCES += src/update_engine/update_engine.dbusclient.h \
-		 src/update_engine/update_engine.dbusserver.h
+BUILT_SOURCES += src/update_engine/update_engine.dbusclient.h
 %.dbusclient.h: %.xml
 	$(AM_V_at) $(MKDIR_P) $(dir $@)
 	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --mode=glib-client \
-	    --prefix=update_engine_service $< > $@
-
-%.dbusserver.h: %.xml
-	$(AM_V_at) $(MKDIR_P) $(dir $@)
-	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --mode=glib-server \
 	    --prefix=update_engine_service $< > $@
 
 EXTRA_DIST += src/update_engine/update_metadata.proto

@@ -134,8 +134,6 @@ int main(int argc, char** argv) {
 
   // Cleanup:
   g_main_loop_unref(loop);
-//  update_attempter->set_dbus_service(NULL);
-//  g_object_unref(G_OBJECT(service));
 
   LOG(INFO) << "reMarkable Update Engine terminating";
   return 0;

@@ -6,10 +6,6 @@
 #define CHROMEOS_PLATFORM_UPDATE_ENGINE_DBUS_SERVICE_H__
 
 #include <inttypes.h>
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-bindings.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#include <glib-object.h>
 #include <core/dbus/dbus.h>
 #include "src/update_engine/dbus_constants.h"
 
@@ -43,53 +39,6 @@ template<> struct Service<Manager> {
     }
 };
 }}}
-
-// Type macros:
-#define UPDATE_ENGINE_TYPE_SERVICE (update_engine_service_get_type())
-#define UPDATE_ENGINE_SERVICE(obj)                                      \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj), UPDATE_ENGINE_TYPE_SERVICE,        \
-                              UpdateEngineService))
-#define UPDATE_ENGINE_IS_SERVICE(obj)                                   \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj), UPDATE_ENGINE_TYPE_SERVICE))
-#define UPDATE_ENGINE_SERVICE_CLASS(klass)                      \
-  (G_TYPE_CHECK_CLASS_CAST((klass), UPDATE_ENGINE_TYPE_SERVICE, \
-                           UpdateEngineService))
-#define UPDATE_ENGINE_IS_SERVICE_CLASS(klass)                           \
-  (G_TYPE_CHECK_CLASS_TYPE((klass), UPDATE_ENGINE_TYPE_SERVICE))
-#define UPDATE_ENGINE_SERVICE_GET_CLASS(obj)                    \
-  (G_TYPE_INSTANCE_GET_CLASS((obj), UPDATE_ENGINE_TYPE_SERVICE, \
-                             UpdateEngineService))
-
-G_BEGIN_DECLS
-
-struct UpdateEngineService {
-  GObject parent_instance;
-
-  chromeos_update_engine::SystemState* system_state_;
-};
-
-struct UpdateEngineServiceClass {
-  GObjectClass parent_class;
-};
-
-UpdateEngineService* update_engine_service_new(void);
-GType update_engine_service_get_type(void);
-
-// Methods
-
-gboolean update_engine_service_attempt_update(UpdateEngineService* self,
-                                              GError **error);
-
-gboolean update_engine_service_reset_status(UpdateEngineService* self,
-                                            GError **error);
-
-gboolean update_engine_service_get_status(UpdateEngineService* self,
-                                          int64_t* last_checked_time,
-                                          double* progress,
-                                          gchar** current_operation,
-                                          gchar** new_version,
-                                          int64_t* new_size,
-                                          GError **error);
 
 gboolean update_engine_service_emit_status_update(
     UpdateEngineService* self,

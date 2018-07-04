@@ -11,18 +11,17 @@
 
 #include "update_engine/marshal.glibmarshal.h"
 #include "update_engine/dbus_constants.h"
+#include "update_engine/dbus_service.h"
 #include "update_engine/subprocess.h"
 #include "update_engine/utils.h"
-
-extern "C" {
-#include "update_engine/update_engine.dbusclient.h"
-}
 
 using chromeos_update_engine::kUpdateEngineServiceName;
 using chromeos_update_engine::kUpdateEngineServicePath;
 using chromeos_update_engine::kUpdateEngineServiceInterface;
 using chromeos_update_engine::utils::GetAndFreeGError;
 using std::string;
+
+namespace dbus = core::dbus;
 
 DEFINE_bool(check_for_update, false, "Initiate check for updates.");
 DEFINE_bool(status, false, "Print the status to stdout.");
@@ -85,7 +84,7 @@ static void StatusUpdateSignalHandler(DBusGProxy* proxy,
   LOG(INFO) << "  new_size: " << new_size;
 }
 
-bool ResetStatus() {
+bool ResetStatus(dbus::Object::Ptr object) {
   DBusGProxy* proxy;
   GError* error = NULL;
 
@@ -99,7 +98,7 @@ bool ResetStatus() {
 
 // If |op| is non-NULL, sets it to the current operation string or an
 // empty string if unable to obtain the current status.
-bool GetStatus(string* op) {
+bool GetStatus(dbus::Object::Ptr object, string* op) {
   DBusGProxy* proxy;
   GError* error = NULL;
 
@@ -171,7 +170,7 @@ void WatchForUpdates() {
   g_main_loop_unref(loop);
 }
 
-bool CheckForUpdates() {
+bool CheckForUpdates(dbus::Object::Ptr object) {
   DBusGProxy* proxy;
   GError* error = NULL;
 
@@ -213,7 +212,17 @@ int main(int argc, char** argv) {
   // Disable glog's default behavior of logging to files.
   FLAGS_logtostderr = true;
   // Boilerplate init commands.
-  dbus_threads_init_default();
+
+  dbus::Bus::Ptr bus = std::make_shared<dbus::Bus>(dbus::WellKnownBus::session);
+  bus->install_executor(core::dbus::asio::make_executor(bus));
+  std::thread t {std::bind(&dbus::Bus::run, bus)};
+
+  dbus::Service::Ptr service = dbus::Service::use_service<Manager>(bus);
+  CHECK(service);
+
+  dbus::Object::Ptr object = service->object_for_path(dbus::types::ObjectPath(chromeos_update_engine::kUpdateEngineServicePath));
+  CHECK(object);
+
   chromeos_update_engine::Subprocess::Init();
   GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
@@ -221,7 +230,7 @@ int main(int argc, char** argv) {
   // Update the status if requested.
   if (FLAGS_reset_status) {
     LOG(INFO) << "Setting Update Engine status to idle ...";
-    if (!ResetStatus()) {
+    if (!ResetStatus(object)) {
       LOG(ERROR) << "ResetStatus failed.";
       return 1;
     }
@@ -235,7 +244,7 @@ int main(int argc, char** argv) {
 
   if (FLAGS_status) {
     LOG(INFO) << "Querying Update Engine status...";
-    if (!GetStatus(NULL)) {
+    if (!GetStatus(object, NULL)) {
       LOG(FATAL) << "GetStatus failed.";
       return 1;
     }
@@ -245,7 +254,7 @@ int main(int argc, char** argv) {
   // Initiate an update check, if necessary.
   if (FLAGS_check_for_update || FLAGS_update) {
     LOG(INFO) << "Initiating update check and install.";
-    CHECK(CheckForUpdates()) << "Update check/initiate update failed.";
+    CHECK(CheckForUpdates(object)) << "Update check/initiate update failed.";
 
     // Wait for an update to complete.
     if (FLAGS_update) {

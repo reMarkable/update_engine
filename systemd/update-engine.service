@@ -6,7 +6,7 @@ ConditionPathExists=!/usr/.noupdate
 [Service]
 Type=dbus
 BusName=no.remarkable.update1
-ExecStart=/usr/sbin/update_engine -foreground -logtostderr
+ExecStart=/usr/sbin/update_engine -foreground
 BlockIOWeight=100
 Restart=always
 RestartSec=30

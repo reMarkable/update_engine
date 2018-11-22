@@ -100,7 +100,12 @@ fi
 cat "${INSTALL_MNT}/usr/share/remarkable/update.conf"
 echo "Setup ${INSTALL_LABEL} (${INSTALL_DEV}) for next boot."
 
-if [[ -n "${WACOM_FLASH}" ]] && [[ -r "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" ]]; then
-    call_wacom_flash "${INSTALL_MNT}/lib/firmware/W9013_0734.hex" "0" "i2c-1"
+WACOM_VERSION="$(call_wacom_flash -a 0 i2c-1 | sed 's/^0*//')"
+#WACOM_VERSION="$(cat /sys/bus/i2c/devices/1-0009/input/input0/id/version | sed 's/^0*//')"
+if [[ "${WACOM_VERSION}" -lt 36 ]] && [[ -n "${WACOM_FLASH}" ]] && [[ -r "${INSTALL_MNT}/lib/firmware/W9013_0736.hex" ]]; then
+    echo "Flashing new Wacom firmware..."
+    call_wacom_flash "${INSTALL_MNT}/lib/firmware/W9013_0736.hex" "0" "i2c-1"
+else
+    echo "Not flashing Wacom firmware, is already ${WACOM_VERSION}"
 fi
 

@@ -34,8 +34,8 @@ const char* const kProductionOmahaUrl(
     "https://updates.cloud.remarkable.engineering/service/update2");
 
 bool OmahaRequestParams::Init(bool interactive) {
-  os_platform_ = OmahaRequestParams::kOsPlatform;
-  os_version_ = OmahaRequestParams::kOsVersion;
+  os_platform_ = GetConfValue("PLATFORM", OmahaRequestParams::kOsPlatform);
+  os_version_ = GetConfValue("OS_VERSION", OmahaRequestParams::kOsVersion);
   oemid_ = GetConfValue("deviceid", "");
   oemversion_ = GetOemValue("VERSION_ID", "");
   app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");

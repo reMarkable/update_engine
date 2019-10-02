@@ -35,7 +35,6 @@
 #include "update_engine/system_state.h"
 #include "update_engine/update_check_scheduler.h"
 
-using google::protobuf::NewPermanentCallback;
 using std::chrono::steady_clock;
 using std::make_pair;
 using std::shared_ptr;

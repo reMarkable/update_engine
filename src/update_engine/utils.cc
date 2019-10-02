@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <glog/logging.h>
 #include <google/protobuf/stubs/common.h>
+#include <google/protobuf/stubs/callback.h>
 #include <rootdev/rootdev.h>
 
 #include "files/eintr_wrapper.h"

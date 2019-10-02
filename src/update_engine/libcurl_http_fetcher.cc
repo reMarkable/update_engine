@@ -14,7 +14,6 @@
 #include "update_engine/dbus_interface.h"
 #include "update_engine/utils.h"
 
-using google::protobuf::NewCallback;
 using std::max;
 using std::make_pair;
 using std::string;

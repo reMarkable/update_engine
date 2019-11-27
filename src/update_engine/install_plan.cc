@@ -50,6 +50,10 @@ bool InstallPlan::operator!=(const InstallPlan &that) const
 
 void InstallPlan::Dump() const
 {
+    string arg_list;
+    for (const string &arg : postinst_args) {
+        arg_list += arg;
+    }
     LOG(INFO) << "InstallPlan: "
               << (is_resume ? ", resume" : ", new_update")
               << ", url: " << download_url
@@ -57,6 +61,7 @@ void InstallPlan::Dump() const
               << ", payload hash: " << payload_hash
               << ", partition_path: " << partition_path
               << ", kernel_path: " << kernel_path
+              << ", postinst_args: " << arg_list
               << ", old_partition_path: " << old_partition_path
               << ", old_kernel_path: " << old_kernel_path;
 }

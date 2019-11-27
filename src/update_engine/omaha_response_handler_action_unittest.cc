@@ -108,6 +108,12 @@ TEST_F(OmahaResponseHandlerActionTest, SimpleTest)
         EXPECT_EQ(in.hash, install_plan.payload_hash);
         EXPECT_EQ(in.display_version, install_plan.display_version);
         EXPECT_EQ("/dev/sda3", install_plan.partition_path);
+
+        const string expected_version = "NEW_VERSION=" + in.display_version;
+        EXPECT_NE(std::find(install_plan.postinst_args.begin(), install_plan.postinst_args.end(),
+                    expected_version),
+                install_plan.postinst_args.end());
+
         string deadline;
         EXPECT_TRUE(utils::ReadFile(
                         OmahaResponseHandlerAction::kDeadlineFile,

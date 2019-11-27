@@ -9,6 +9,13 @@ umask 0022
 
 INSTALL_MNT=$(dirname "$0")
 INSTALL_DEV="$1"
+NEW_VERSION=""
+
+for arg in "$@"; do
+    case "${arg}" in
+        NEW_VERSION=*) NEW_VERSION="${arg#NEW_VERSION=}" ;;
+    esac
+done
 
 # use the fw_setenv binary from the image to ensure compatibility
 FW_SETENV=

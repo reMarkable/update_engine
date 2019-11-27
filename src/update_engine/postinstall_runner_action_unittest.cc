@@ -23,133 +23,150 @@ using strings::StringPrintf;
 
 namespace chromeos_update_engine {
 
-class PostinstallRunnerActionTest : public ::testing::Test {
- public:
-  void DoTest(bool do_losetup, int err_code);
+class PostinstallRunnerActionTest : public ::testing::Test
+{
+public:
+    void DoTest(bool do_losetup, int err_code);
 };
 
-TEST_F(PostinstallRunnerActionTest, RunAsRootSimpleTest) {
-  ASSERT_EQ(0, getuid());
-  DoTest(true, 0);
+TEST_F(PostinstallRunnerActionTest, RunAsRootSimpleTest)
+{
+    ASSERT_EQ(0, getuid());
+    DoTest(true, 0);
 }
 
-TEST_F(PostinstallRunnerActionTest, RunAsRootCantMountTest) {
-  ASSERT_EQ(0, getuid());
-  DoTest(false, 0);
+TEST_F(PostinstallRunnerActionTest, RunAsRootCantMountTest)
+{
+    ASSERT_EQ(0, getuid());
+    DoTest(false, 0);
 }
 
-TEST_F(PostinstallRunnerActionTest, RunAsRootErrScriptTest) {
-  ASSERT_EQ(0, getuid());
-  DoTest(true, 1);
+TEST_F(PostinstallRunnerActionTest, RunAsRootErrScriptTest)
+{
+    ASSERT_EQ(0, getuid());
+    DoTest(true, 1);
 }
 
-TEST_F(PostinstallRunnerActionTest, RunAsRootFirmwareBErrScriptTest) {
-  ASSERT_EQ(0, getuid());
-  DoTest(true, 3);
+TEST_F(PostinstallRunnerActionTest, RunAsRootFirmwareBErrScriptTest)
+{
+    ASSERT_EQ(0, getuid());
+    DoTest(true, 3);
 }
 
-void PostinstallRunnerActionTest::DoTest(bool do_losetup, int err_code) {
-  ASSERT_EQ(0, getuid()) << "Run me as root. Ideally don't run other tests "
-                         << "as root, tho.";
+void PostinstallRunnerActionTest::DoTest(bool do_losetup, int err_code)
+{
+    ASSERT_EQ(0, getuid()) << "Run me as root. Ideally don't run other tests "
+                           << "as root, tho.";
 
-  string mountpoint;
-  EXPECT_TRUE(utils::MakeTempDirectory("/tmp/PostinstallRunnerActionTest.XXXXXX",
-                                       &mountpoint));
-  ScopedDirRemover mountpoint_remover(mountpoint);
+    string mountpoint;
+    EXPECT_TRUE(utils::MakeTempDirectory("/tmp/PostinstallRunnerActionTest.XXXXXX",
+                                         &mountpoint));
+    ScopedDirRemover mountpoint_remover(mountpoint);
 
-  string cwd;
-  {
-    vector<char> buf(1000);
-    ASSERT_EQ(&buf[0], getcwd(&buf[0], buf.size()));
-    cwd = string(&buf[0], strlen(&buf[0]));
-  }
+    string cwd;
+    {
+        vector<char> buf(1000);
+        ASSERT_EQ(&buf[0], getcwd(&buf[0], buf.size()));
+        cwd = string(&buf[0], strlen(&buf[0]));
+    }
 
-  // create the au destination, if it doesn't exist
-  ASSERT_EQ(0, System(string("mkdir -p ") + mountpoint));
+    // create the au destination, if it doesn't exist
+    ASSERT_EQ(0, System(string("mkdir -p ") + mountpoint));
 
-  // create 10MiB sparse file
-  ASSERT_EQ(0, system("dd if=/dev/zero of=image.dat seek=10485759 bs=1 "
-                      "count=1"));
+    // create 10MiB sparse file
+    ASSERT_EQ(0, system("dd if=/dev/zero of=image.dat seek=10485759 bs=1 "
+                        "count=1"));
 
-  // format it as ext2
-  ASSERT_EQ(0, system("mkfs.ext2 -F image.dat"));
+    // format it as ext2
+    ASSERT_EQ(0, system("mkfs.ext2 -F image.dat"));
 
-  // mount it
-  ASSERT_EQ(0, System(string("mount -o loop image.dat ") + mountpoint));
+    // mount it
+    ASSERT_EQ(0, System(string("mount -o loop image.dat ") + mountpoint));
 
-  // put a postinst script in
-  string script = StringPrintf("#!/bin/bash\n"
-                               "touch %s/postinst_called\n",
-                               cwd.c_str());
-  if (err_code) {
-    script = StringPrintf("#!/bin/bash\nexit %d", err_code);
-  }
-  ASSERT_TRUE(WriteFileString(mountpoint + "/postinst", script));
-  ASSERT_EQ(0, System(string("chmod a+x ") + mountpoint + "/postinst"));
+    // put a postinst script in
+    string script = StringPrintf("#!/bin/bash\n"
+                                 "touch %s/postinst_called\n",
+                                 cwd.c_str());
 
-  ASSERT_TRUE(utils::UnmountFilesystem(mountpoint));
+    if (err_code) {
+        script = StringPrintf("#!/bin/bash\nexit %d", err_code);
+    }
 
-  ASSERT_EQ(0, System(string("rm -f ") + cwd + "/postinst_called"));
+    ASSERT_TRUE(WriteFileString(mountpoint + "/postinst", script));
+    ASSERT_EQ(0, System(string("chmod a+x ") + mountpoint + "/postinst"));
 
-  // get a loop device we can use for the install device
-  string dev = "/dev/null";
+    ASSERT_TRUE(utils::UnmountFilesystem(mountpoint));
 
-  std::unique_ptr<ScopedLoopbackDeviceBinder> loop_releaser;
-  if (do_losetup) {
-    loop_releaser.reset(new ScopedLoopbackDeviceBinder(cwd + "/image.dat",
-                                                       &dev));
-  }
+    ASSERT_EQ(0, System(string("rm -f ") + cwd + "/postinst_called"));
 
-  ActionProcessor processor;
-  ActionTestDelegate<PostinstallRunnerAction> delegate;
+    // get a loop device we can use for the install device
+    string dev = "/dev/null";
 
-  ObjectFeederAction<InstallPlan> feeder_action;
-  InstallPlan install_plan;
-  install_plan.partition_path = dev;
-  feeder_action.set_obj(install_plan);
+    std::unique_ptr<ScopedLoopbackDeviceBinder> loop_releaser;
 
-  PostinstallRunnerAction runner_action;
-  BondActions(&feeder_action, &runner_action);
+    if (do_losetup) {
+        loop_releaser.reset(new ScopedLoopbackDeviceBinder(cwd + "/image.dat",
+                            &dev));
+    }
 
-  ObjectCollectorAction<InstallPlan> collector_action;
-  BondActions(&runner_action, &collector_action);
+    ActionProcessor processor;
+    ActionTestDelegate<PostinstallRunnerAction> delegate;
 
-  processor.EnqueueAction(&feeder_action);
-  processor.EnqueueAction(&runner_action);
-  processor.EnqueueAction(&collector_action);
+    ObjectFeederAction<InstallPlan> feeder_action;
+    InstallPlan install_plan;
+    install_plan.partition_path = dev;
+    feeder_action.set_obj(install_plan);
 
-  delegate.RunProcessorInMainLoop(&processor);
+    PostinstallRunnerAction runner_action;
+    BondActions(&feeder_action, &runner_action);
 
-  EXPECT_TRUE(delegate.ran());
-  EXPECT_EQ(do_losetup && !err_code, delegate.code() == kActionCodeSuccess);
-  EXPECT_EQ(do_losetup && !err_code,
-            !collector_action.object().partition_path.empty());
-  if (do_losetup && !err_code) {
-    EXPECT_TRUE(install_plan == collector_action.object());
-  }
-  if (err_code == 2)
-    EXPECT_EQ(kActionCodePostinstallBootedFromFirmwareB, delegate.code());
+    ObjectCollectorAction<InstallPlan> collector_action;
+    BondActions(&runner_action, &collector_action);
 
-  struct stat stbuf;
-  int rc = lstat((string(cwd) + "/postinst_called").c_str(), &stbuf);
-  if (do_losetup && !err_code)
-    ASSERT_EQ(0, rc);
-  else
-    ASSERT_LT(rc, 0);
+    processor.EnqueueAction(&feeder_action);
+    processor.EnqueueAction(&runner_action);
+    processor.EnqueueAction(&collector_action);
 
-  if (do_losetup) {
-    loop_releaser.reset(NULL);
-  }
-  ASSERT_EQ(0, System(string("rm -f ") + cwd + "/postinst_called"));
-  ASSERT_EQ(0, System(string("rm -f ") + cwd + "/image.dat"));
+    delegate.RunProcessorInMainLoop(&processor);
+
+    EXPECT_TRUE(delegate.ran());
+    EXPECT_EQ(do_losetup && !err_code, delegate.code() == kActionCodeSuccess);
+    EXPECT_EQ(do_losetup && !err_code,
+              !collector_action.object().partition_path.empty());
+
+    if (do_losetup && !err_code) {
+        EXPECT_TRUE(install_plan == collector_action.object());
+    }
+
+    if (err_code == 2) {
+        EXPECT_EQ(kActionCodePostinstallBootedFromFirmwareB, delegate.code());
+    }
+
+    struct stat stbuf;
+
+    int rc = lstat((string(cwd) + "/postinst_called").c_str(), &stbuf);
+
+    if (do_losetup && !err_code) {
+        ASSERT_EQ(0, rc);
+    } else {
+        ASSERT_LT(rc, 0);
+    }
+
+    if (do_losetup) {
+        loop_releaser.reset(NULL);
+    }
+
+    ASSERT_EQ(0, System(string("rm -f ") + cwd + "/postinst_called"));
+    ASSERT_EQ(0, System(string("rm -f ") + cwd + "/image.dat"));
 }
 
 // Death tests don't seem to be working on Hardy
-TEST_F(PostinstallRunnerActionTest, DISABLED_RunAsRootDeathTest) {
-  ASSERT_EQ(0, getuid());
-  PostinstallRunnerAction runner_action;
-  ASSERT_DEATH({ runner_action.TerminateProcessing(); },
-               "postinstall_runner_action.h:.*] Check failed");
+TEST_F(PostinstallRunnerActionTest, DISABLED_RunAsRootDeathTest)
+{
+    ASSERT_EQ(0, getuid());
+    PostinstallRunnerAction runner_action;
+    ASSERT_DEATH({ runner_action.TerminateProcessing(); },
+                 "postinstall_runner_action.h:.*] Check failed");
 }
 
 }  // namespace chromeos_update_engine

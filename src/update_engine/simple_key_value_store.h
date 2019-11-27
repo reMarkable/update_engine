@@ -14,11 +14,11 @@
 
 namespace chromeos_update_engine {
 namespace simple_key_value_store {
-  
-// Parses a string. 
-std::map<std::string, std::string> ParseString(const std::string& str);
 
-std::string AssembleString(const std::map<std::string, std::string>& data);
+// Parses a string.
+std::map<std::string, std::string> ParseString(const std::string &str);
+
+std::string AssembleString(const std::map<std::string, std::string> &data);
 
 }  // namespace simple_key_value_store
 }  // namespace chromeos_update_engine

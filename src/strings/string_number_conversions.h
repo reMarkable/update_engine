@@ -35,9 +35,9 @@ namespace strings {
 //  - No characters parseable as a number at the beginning of the string.
 //    |*output| will be set to 0.
 //  - Empty string.  |*output| will be set to 0.
-bool StringToInt(const std::string& input, int* output);
-bool StringToUint(const std::string& input, unsigned* output);
-bool StringToInt64(const std::string& input, int64_t* output);
+bool StringToInt(const std::string &input, int *output);
+bool StringToUint(const std::string &input, unsigned *output);
+bool StringToInt64(const std::string &input, int64_t *output);
 
 // Hex encoding ----------------------------------------------------------------
 
@@ -47,7 +47,7 @@ bool StringToInt64(const std::string& input, int64_t* output);
 // you suspect that the data you want to format might be large, the absolute
 // max size for |size| should be is
 //   std::numeric_limits<size_t>::max() / 2
-std::string HexEncode(const void* bytes, size_t size);
+std::string HexEncode(const void *bytes, size_t size);
 
 }  // namespace strings
 

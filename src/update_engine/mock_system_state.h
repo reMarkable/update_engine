@@ -19,55 +19,63 @@ namespace chromeos_update_engine {
 
 // Mock the SystemStateInterface so that we could lie that
 // OOBE is completed even when there's no such marker file, etc.
-class MockSystemState : public SystemState {
- public:
-  MockSystemState();
+class MockSystemState : public SystemState
+{
+public:
+    MockSystemState();
 
-  virtual ~MockSystemState() {}
+    virtual ~MockSystemState() {}
 
-  inline virtual PrefsInterface* prefs() {
-    return prefs_;
-  }
+    inline virtual PrefsInterface *prefs()
+    {
+        return prefs_;
+    }
 
-  inline virtual PayloadStateInterface* payload_state() {
-    return &mock_payload_state_;
-  }
+    inline virtual PayloadStateInterface *payload_state()
+    {
+        return &mock_payload_state_;
+    }
 
-  virtual UpdateAttempter* update_attempter();
+    virtual UpdateAttempter *update_attempter();
 
-  inline virtual OmahaRequestParams* request_params() {
-    return request_params_;
-  }
+    inline virtual OmahaRequestParams *request_params()
+    {
+        return request_params_;
+    }
 
-  inline void set_prefs(PrefsInterface* prefs) {
-    prefs_ = prefs;
-  }
+    inline void set_prefs(PrefsInterface *prefs)
+    {
+        prefs_ = prefs;
+    }
 
-  inline testing::NiceMock<PrefsMock> *mock_prefs() {
-    return &mock_prefs_;
-  }
+    inline testing::NiceMock<PrefsMock> *mock_prefs()
+    {
+        return &mock_prefs_;
+    }
 
-  inline MockPayloadState* mock_payload_state() {
-    return &mock_payload_state_;
-  }
+    inline MockPayloadState *mock_payload_state()
+    {
+        return &mock_payload_state_;
+    }
 
-  inline void set_request_params(OmahaRequestParams* params) {
-    request_params_ = params;
-  }
+    inline void set_request_params(OmahaRequestParams *params)
+    {
+        request_params_ = params;
+    }
 
- private:
-  // These are Mock objects or objects we own.
-  testing::NiceMock<PrefsMock> mock_prefs_;
-  testing::NiceMock<MockPayloadState> mock_payload_state_;
-  std::unique_ptr<testing::NiceMock<UpdateAttempterMock>> mock_update_attempter_;
-  MockDbusGlib dbus_;
+private:
+    // These are Mock objects or objects we own.
+    testing::NiceMock<PrefsMock> mock_prefs_;
+    testing::NiceMock<MockPayloadState> mock_payload_state_;
+    std::unique_ptr<testing::NiceMock<UpdateAttempterMock>> mock_update_attempter_;
+    MockDbusGlib dbus_;
 
-  // These are the other object we own.
-  OmahaRequestParams default_request_params_;
+    // These are the other object we own.
+    OmahaRequestParams default_request_params_;
 
-  // These are pointers to objects which caller can override.
-  PrefsInterface* prefs_;
-  OmahaRequestParams* request_params_;
+    // These are pointers to objects which caller can override.
+    PrefsInterface *prefs_;
+    OmahaRequestParams *request_params_;
 };
 
 } // namespeace chromeos_update_engine

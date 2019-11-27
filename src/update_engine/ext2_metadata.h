@@ -10,26 +10,27 @@
 
 namespace chromeos_update_engine {
 
-class Ext2Metadata {
- public:
-  // Reads metadata from old image and new image and determines
-  // the smallest way to encode the metadata for the diff.
-  // If there's no change in the metadata, it creates a MOVE
-  // operation. If there is a change, the smallest of REPLACE, REPLACE_BZ,
-  // or BSDIFF wins. It writes the diff to data_fd and updates data_file_size
-  // accordingly. It also adds the required operation to the graph and adds the
-  // metadata extents to blocks.
-  // Returns true on success.
-  static bool DeltaReadMetadata(Graph* graph,
-                                std::vector<DeltaDiffGenerator::Block>* blocks,
-                                const std::string& old_image,
-                                const std::string& new_image,
-                                int data_fd,
-                                off_t* data_file_size);
+class Ext2Metadata
+{
+public:
+    // Reads metadata from old image and new image and determines
+    // the smallest way to encode the metadata for the diff.
+    // If there's no change in the metadata, it creates a MOVE
+    // operation. If there is a change, the smallest of REPLACE, REPLACE_BZ,
+    // or BSDIFF wins. It writes the diff to data_fd and updates data_file_size
+    // accordingly. It also adds the required operation to the graph and adds the
+    // metadata extents to blocks.
+    // Returns true on success.
+    static bool DeltaReadMetadata(Graph *graph,
+                                  std::vector<DeltaDiffGenerator::Block> *blocks,
+                                  const std::string &old_image,
+                                  const std::string &new_image,
+                                  int data_fd,
+                                  off_t *data_file_size);
 
- private:
-  // This should never be constructed.
-  DISALLOW_IMPLICIT_CONSTRUCTORS(Ext2Metadata);
+private:
+    // This should never be constructed.
+    DISALLOW_IMPLICIT_CONSTRUCTORS(Ext2Metadata);
 };
 
 };  // namespace chromeos_update_engine

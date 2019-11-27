@@ -18,23 +18,30 @@ namespace internal {
 // return value for errors. It *should* be -1 but lets just make sure.
 static_assert(EOF == -1, "fclose's error value is not -1");
 
-void ScopedFILECloser::operator()(FILE* x) const {
-  if (x == nullptr)
-    return;
+void ScopedFILECloser::operator()(FILE *x) const
+{
+    if (x == nullptr) {
+        return;
+    }
 
-  int fd = fileno(x);
-  if (IGNORE_EINTR(fclose(x)) == EOF)
-    PLOG(ERROR) << "Error while closing file descriptor " << fd;
+    int fd = fileno(x);
+
+    if (IGNORE_EINTR(fclose(x)) == EOF) {
+        PLOG(ERROR) << "Error while closing file descriptor " << fd;
+    }
 }
 
 }  // namespace internal
 
-ScopedFD::~ScopedFD() {
-  if (fd_ < 0)
-    return;
+ScopedFD::~ScopedFD()
+{
+    if (fd_ < 0) {
+        return;
+    }
 
-  if (IGNORE_EINTR(close(fd_)) == -1)
-    PLOG(ERROR) << "Error while closing file descriptor " << fd_;
+    if (IGNORE_EINTR(close(fd_)) == -1) {
+        PLOG(ERROR) << "Error while closing file descriptor " << fd_;
+    }
 }
 
 }  // namespace files

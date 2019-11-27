@@ -22,11 +22,11 @@ namespace extent_mapper {
 // the blocksize of a filesystem is often 4096 bytes, that is not always
 // the case, so one should consult GetFilesystemBlockSize(), too.
 // Returns true on success.
-bool ExtentsForFileFibmap(const std::string& path, std::vector<Extent>* out);
+bool ExtentsForFileFibmap(const std::string &path, std::vector<Extent> *out);
 
 // Puts the blocksize of the filesystem, as used by the FIBMAP ioctl, into
 // out_blocksize by using the FIGETBSZ ioctl. Returns true on success.
-bool GetFilesystemBlockSize(const std::string& path, uint32_t* out_blocksize);
+bool GetFilesystemBlockSize(const std::string &path, uint32_t *out_blocksize);
 
 }  // namespace extent_mapper
 

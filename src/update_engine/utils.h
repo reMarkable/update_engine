@@ -32,7 +32,7 @@ using days_t = std::chrono::duration<int, std::ratio<86400>>;
 bool IsOfficialBuild();
 
 // Returns true if string starts with https://
-bool IsHTTPS(const std::string& url);
+bool IsHTTPS(const std::string &url);
 
 // Returns the HWID or an empty string on error.
 std::string GetHardwareClass();
@@ -48,47 +48,47 @@ std::string GetUuid();
 
 // Writes the data passed to path. The file at path will be overwritten if it
 // exists. Returns true on success, false otherwise.
-bool WriteFile(const char* path, const char* data, int data_len);
+bool WriteFile(const char *path, const char *data, int data_len);
 
 // Calls write() or pwrite() repeatedly until all count bytes at buf are
 // written to fd or an error occurs. Returns true on success.
-bool WriteAll(int fd, const void* buf, size_t count);
-bool PWriteAll(int fd, const void* buf, size_t count, off_t offset);
+bool WriteAll(int fd, const void *buf, size_t count);
+bool PWriteAll(int fd, const void *buf, size_t count, off_t offset);
 
 // Calls pread() repeatedly until count bytes are read, or EOF is reached.
 // Returns number of bytes read in *bytes_read. Returns true on success.
-bool PReadAll(int fd, void* buf, size_t count, off_t offset,
-              ssize_t* out_bytes_read);
+bool PReadAll(int fd, void *buf, size_t count, off_t offset,
+              ssize_t *out_bytes_read);
 
 // Opens |path| for reading and appends its entire content to the container
 // pointed to by |out_p|. Returns true upon successfully reading all of the
 // file's content, false otherwise, in which case the state of the output
 // container is unknown.
-bool ReadFile(const std::string& path, std::vector<char>* out_p);
-bool ReadFile(const std::string& path, std::string* out_p);
+bool ReadFile(const std::string &path, std::vector<char> *out_p);
+bool ReadFile(const std::string &path, std::string *out_p);
 
 // Invokes |cmd| in a pipe and appends its stdout to the container pointed to by
 // |out_p|. Returns true upon successfully reading all of the output, false
 // otherwise, in which case the state of the output container is unknown.
-bool ReadPipe(const std::string& cmd, std::vector<char>* out_p);
-bool ReadPipe(const std::string& cmd, std::string* out_p);
+bool ReadPipe(const std::string &cmd, std::vector<char> *out_p);
+bool ReadPipe(const std::string &cmd, std::string *out_p);
 
 // Returns the size of the file at path. If the file doesn't exist or some
 // error occurrs, -1 is returned.
-off_t FileSize(const std::string& path);
+off_t FileSize(const std::string &path);
 
 std::string ErrnoNumberAsString(int err);
 
 // Strips duplicate slashes, and optionally removes all trailing slashes.
 // Does not compact /./ or /../.
-std::string NormalizePath(const std::string& path, bool strip_trailing_slash);
+std::string NormalizePath(const std::string &path, bool strip_trailing_slash);
 
 // Returns true if the file exists for sure. Returns false if it doesn't exist,
 // or an error occurs.
-bool FileExists(const char* path);
+bool FileExists(const char *path);
 
 // Returns true if |path| exists and is a symbolic link.
-bool IsSymlink(const char* path);
+bool IsSymlink(const char *path);
 
 // The last 6 chars of path must be XXXXXX. They will be randomly changed
 // and a non-existent path will be returned. Intentionally makes a copy
@@ -103,49 +103,49 @@ std::string TempFilename(std::string path);
 // fd is NULL, the fd from mkstemp() will be closed.
 // The last six chars of the template must be XXXXXX.
 // Returns true on success.
-bool MakeTempFile(const std::string& filename_template,
-                  std::string* filename,
-                  int* fd);
+bool MakeTempFile(const std::string &filename_template,
+                  std::string *filename,
+                  int *fd);
 
 // Calls mkdtemp() with the template passed. Returns the generated dirname
 // in the dirname param. Returns TRUE on success. dirname must not be NULL.
-bool MakeTempDirectory(const std::string& dirname_template,
-                       std::string* dirname);
+bool MakeTempDirectory(const std::string &dirname_template,
+                       std::string *dirname);
 
 // Deletes a directory and all its contents synchronously. Returns true
 // on success. This may be called with a regular file--it will just unlink it.
 // This WILL cross filesystem boundaries.
-bool RecursiveUnlinkDir(const std::string& path);
+bool RecursiveUnlinkDir(const std::string &path);
 
 // Synchronously mount or unmount a filesystem. Return true on success.
 // Mounts as ext3 with default options.
-bool MountFilesystem(const std::string& device, const std::string& mountpoint,
+bool MountFilesystem(const std::string &device, const std::string &mountpoint,
                      unsigned long flags);
-bool UnmountFilesystem(const std::string& mountpoint);
+bool UnmountFilesystem(const std::string &mountpoint);
 
 // Get the size in bytes of a block device or regular file.
 // Returns true on success, false otherwise.
-bool GetDeviceSize(const std::string& device, off_t* size);
-bool GetDeviceSizeFromFD(int fd, off_t* size);
+bool GetDeviceSize(const std::string &device, off_t *size);
+bool GetDeviceSizeFromFD(int fd, off_t *size);
 
 // Returns the string representation of the given UTC time.
 // such as "11/14/2011 14:05:30 UTC".
-std::string ToString(const std::chrono::system_clock::time_point& tp);
+std::string ToString(const std::chrono::system_clock::time_point &tp);
 
 // Returns true or false depending on the value of b.
 std::string ToString(bool b);
 
 enum BootLoader {
-  BootLoader_SYSLINUX = 0,
-  BootLoader_CHROME_FIRMWARE = 1
+    BootLoader_SYSLINUX = 0,
+    BootLoader_CHROME_FIRMWARE = 1
 };
 // Detects which bootloader this system uses and returns it via the out
 // param. Returns true on success.
-bool GetBootloader(BootLoader* out_bootloader);
+bool GetBootloader(BootLoader *out_bootloader);
 
 // Returns the error message, if any, from a GError pointer. Frees the GError
 // object and resets error to NULL.
-std::string GetAndFreeGError(GError** error);
+std::string GetAndFreeGError(GError **error);
 
 // Initiates a system reboot. Returns true on success, false otherwise.
 bool Reboot();
@@ -159,47 +159,54 @@ void ScheduleCrashReporterUpload();
 int32_t FuzzInt(int32_t value, uint32_t range);
 
 // Log a string in hex to LOG(INFO). Useful for debugging.
-void HexDumpArray(const unsigned char* const arr, const size_t length);
-inline void HexDumpString(const std::string& str) {
-  HexDumpArray(reinterpret_cast<const unsigned char*>(str.data()), str.size());
+void HexDumpArray(const unsigned char *const arr, const size_t length);
+inline void HexDumpString(const std::string &str)
+{
+    HexDumpArray(reinterpret_cast<const unsigned char *>(str.data()), str.size());
 }
-inline void HexDumpVector(const std::vector<char>& vect) {
-  HexDumpArray(reinterpret_cast<const unsigned char*>(&vect[0]), vect.size());
+inline void HexDumpVector(const std::vector<char> &vect)
+{
+    HexDumpArray(reinterpret_cast<const unsigned char *>(&vect[0]), vect.size());
 }
 
-bool StringHasSuffix(const std::string& str, const std::string& suffix);
-bool StringHasPrefix(const std::string& str, const std::string& prefix);
-
-template<typename T>
-bool VectorContainsValue(const std::vector<T>& vect, const T& value) {
-  return std::find(vect.begin(), vect.end(), value) != vect.end();
-}
+bool StringHasSuffix(const std::string &str, const std::string &suffix);
+bool StringHasPrefix(const std::string &str, const std::string &prefix);
 
 template<typename T>
-bool VectorIndexOf(const std::vector<T>& vect, const T& value,
-                   typename std::vector<T>::size_type* out_index) {
-  typename std::vector<T>::const_iterator it = std::find(vect.begin(),
-                                                         vect.end(),
-                                                         value);
-  if (it == vect.end()) {
-    return false;
-  } else {
-    *out_index = it - vect.begin();
-    return true;
-  }
+bool VectorContainsValue(const std::vector<T> &vect, const T &value)
+{
+    return std::find(vect.begin(), vect.end(), value) != vect.end();
+}
+
+template<typename T>
+bool VectorIndexOf(const std::vector<T> &vect, const T &value,
+                   typename std::vector<T>::size_type *out_index)
+{
+    typename std::vector<T>::const_iterator it = std::find(vect.begin(),
+            vect.end(),
+            value);
+
+    if (it == vect.end()) {
+        return false;
+    } else {
+        *out_index = it - vect.begin();
+        return true;
+    }
 }
 
 template<typename ValueType>
-void ApplyMap(std::vector<ValueType>* collection,
-              const std::map<ValueType, ValueType>& the_map) {
-  for (typename std::vector<ValueType>::iterator it = collection->begin();
-       it != collection->end(); ++it) {
-    typename std::map<ValueType, ValueType>::const_iterator map_it =
-      the_map.find(*it);
-    if (map_it != the_map.end()) {
-      *it = map_it->second;
+void ApplyMap(std::vector<ValueType> *collection,
+              const std::map<ValueType, ValueType> &the_map)
+{
+    for (typename std::vector<ValueType>::iterator it = collection->begin();
+            it != collection->end(); ++it) {
+        typename std::map<ValueType, ValueType>::const_iterator map_it =
+            the_map.find(*it);
+
+        if (map_it != the_map.end()) {
+            *it = map_it->second;
+        }
     }
-  }
 }
 
 // Returns the currently booted device. "/dev/sda3", for example.
@@ -239,102 +246,126 @@ std::string CodeToString(ActionExitCode code);
 
 
 // Class to unmount FS when object goes out of scope
-class ScopedFilesystemUnmounter {
- public:
-  explicit ScopedFilesystemUnmounter(const std::string& mountpoint)
-      : mountpoint_(mountpoint),
-        should_unmount_(true) {}
-  ~ScopedFilesystemUnmounter() {
-    if (should_unmount_) {
-      utils::UnmountFilesystem(mountpoint_);
+class ScopedFilesystemUnmounter
+{
+public:
+    explicit ScopedFilesystemUnmounter(const std::string &mountpoint)
+        : mountpoint_(mountpoint),
+          should_unmount_(true) {}
+    ~ScopedFilesystemUnmounter()
+    {
+        if (should_unmount_) {
+            utils::UnmountFilesystem(mountpoint_);
+        }
     }
-  }
-  void set_should_unmount(bool unmount) { should_unmount_ = unmount; }
- private:
-  const std::string mountpoint_;
-  bool should_unmount_;
-  DISALLOW_COPY_AND_ASSIGN(ScopedFilesystemUnmounter);
+    void set_should_unmount(bool unmount)
+    {
+        should_unmount_ = unmount;
+    }
+private:
+    const std::string mountpoint_;
+    bool should_unmount_;
+    DISALLOW_COPY_AND_ASSIGN(ScopedFilesystemUnmounter);
 };
 
 // Utility class to delete a file when it goes out of scope.
-class ScopedPathUnlinker {
- public:
-  explicit ScopedPathUnlinker(const std::string& path)
-      : path_(path),
-        should_remove_(true) {}
-  ~ScopedPathUnlinker() {
-    if (should_remove_ && unlink(path_.c_str()) < 0) {
-      std::string err_message = strerror(errno);
-      LOG(ERROR) << "Unable to unlink path " << path_ << ": " << err_message;
+class ScopedPathUnlinker
+{
+public:
+    explicit ScopedPathUnlinker(const std::string &path)
+        : path_(path),
+          should_remove_(true) {}
+    ~ScopedPathUnlinker()
+    {
+        if (should_remove_ && unlink(path_.c_str()) < 0) {
+            std::string err_message = strerror(errno);
+            LOG(ERROR) << "Unable to unlink path " << path_ << ": " << err_message;
+        }
     }
-  }
-  void set_should_remove(bool should_remove) { should_remove_ = should_remove; }
+    void set_should_remove(bool should_remove)
+    {
+        should_remove_ = should_remove;
+    }
 
- private:
-  const std::string path_;
-  bool should_remove_;
-  DISALLOW_COPY_AND_ASSIGN(ScopedPathUnlinker);
+private:
+    const std::string path_;
+    bool should_remove_;
+    DISALLOW_COPY_AND_ASSIGN(ScopedPathUnlinker);
 };
 
 // Utility class to delete an empty directory when it goes out of scope.
-class ScopedDirRemover {
- public:
-  explicit ScopedDirRemover(const std::string& path)
-      : path_(path),
-        should_remove_(true) {}
-  ~ScopedDirRemover() {
-    if (should_remove_ && (rmdir(path_.c_str()) < 0)) {
-      PLOG(ERROR) << "Unable to remove dir " << path_;
+class ScopedDirRemover
+{
+public:
+    explicit ScopedDirRemover(const std::string &path)
+        : path_(path),
+          should_remove_(true) {}
+    ~ScopedDirRemover()
+    {
+        if (should_remove_ && (rmdir(path_.c_str()) < 0)) {
+            PLOG(ERROR) << "Unable to remove dir " << path_;
+        }
     }
-  }
-  void set_should_remove(bool should_remove) { should_remove_ = should_remove; }
+    void set_should_remove(bool should_remove)
+    {
+        should_remove_ = should_remove;
+    }
 
- protected:
-  const std::string path_;
+protected:
+    const std::string path_;
 
- private:
-  bool should_remove_;
-  DISALLOW_COPY_AND_ASSIGN(ScopedDirRemover);
+private:
+    bool should_remove_;
+    DISALLOW_COPY_AND_ASSIGN(ScopedDirRemover);
 };
 
 // Utility class to unmount a filesystem mounted on a temporary directory and
 // delete the temporary directory when it goes out of scope.
-class ScopedTempUnmounter : public ScopedDirRemover {
- public:
-  explicit ScopedTempUnmounter(const std::string& path) :
-      ScopedDirRemover(path) {}
-  ~ScopedTempUnmounter() {
-    utils::UnmountFilesystem(path_);
-  }
- private:
-  DISALLOW_COPY_AND_ASSIGN(ScopedTempUnmounter);
+class ScopedTempUnmounter : public ScopedDirRemover
+{
+public:
+    explicit ScopedTempUnmounter(const std::string &path) :
+        ScopedDirRemover(path) {}
+    ~ScopedTempUnmounter()
+    {
+        utils::UnmountFilesystem(path_);
+    }
+private:
+    DISALLOW_COPY_AND_ASSIGN(ScopedTempUnmounter);
 };
 
 // A little object to call ActionComplete on the ActionProcessor when
 // it's destructed.
-class ScopedActionCompleter {
- public:
-  explicit ScopedActionCompleter(ActionProcessor* processor,
-                                 AbstractAction* action)
-      : processor_(processor),
-        action_(action),
-        code_(kActionCodeError),
-        should_complete_(true) {}
-  ~ScopedActionCompleter() {
-    if (should_complete_)
-      processor_->ActionComplete(action_, code_);
-  }
-  void set_code(ActionExitCode code) { code_ = code; }
-  void set_should_complete(bool should_complete) {
-    should_complete_ = should_complete;
-  }
+class ScopedActionCompleter
+{
+public:
+    explicit ScopedActionCompleter(ActionProcessor *processor,
+                                   AbstractAction *action)
+        : processor_(processor),
+          action_(action),
+          code_(kActionCodeError),
+          should_complete_(true) {}
+    ~ScopedActionCompleter()
+    {
+        if (should_complete_) {
+            processor_->ActionComplete(action_, code_);
+        }
+    }
+    void set_code(ActionExitCode code)
+    {
+        code_ = code;
+    }
+    void set_should_complete(bool should_complete)
+    {
+        should_complete_ = should_complete;
+    }
 
- private:
-  ActionProcessor* processor_;
-  AbstractAction* action_;
-  ActionExitCode code_;
-  bool should_complete_;
-  DISALLOW_COPY_AND_ASSIGN(ScopedActionCompleter);
+private:
+    ActionProcessor *processor_;
+    AbstractAction *action_;
+    ActionExitCode code_;
+    bool should_complete_;
+    DISALLOW_COPY_AND_ASSIGN(ScopedActionCompleter);
 };
 
 }  // namespace chromeos_update_engine

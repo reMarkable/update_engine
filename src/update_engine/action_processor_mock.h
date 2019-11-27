@@ -11,10 +11,11 @@
 
 namespace chromeos_update_engine {
 
-class ActionProcessorMock : public ActionProcessor {
- public:
-  MOCK_METHOD0(StartProcessing, void());
-  MOCK_METHOD1(EnqueueAction, void(AbstractAction* action));
+class ActionProcessorMock : public ActionProcessor
+{
+public:
+    MOCK_METHOD0(StartProcessing, void());
+    MOCK_METHOD1(EnqueueAction, void(AbstractAction *action));
 };
 
 }  // namespace chromeos_update_engine

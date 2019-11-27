@@ -14,12 +14,13 @@ namespace chromeos_update_engine {
 
 class MockSystemState;
 
-class UpdateAttempterMock : public UpdateAttempter {
- public:
-  explicit UpdateAttempterMock(MockSystemState* mock_system_state,
-                               MockDbusGlib* dbus);
+class UpdateAttempterMock : public UpdateAttempter
+{
+public:
+    explicit UpdateAttempterMock(MockSystemState *mock_system_state,
+                                 MockDbusGlib *dbus);
 
-  MOCK_METHOD1(Update, void(bool interactive));
+    MOCK_METHOD1(Update, void(bool interactive));
 };
 
 }  // namespace chromeos_update_engine

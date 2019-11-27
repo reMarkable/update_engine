@@ -10,16 +10,18 @@ namespace chromeos_update_engine {
 // Mock the SystemStateInterface so that we could lie that
 // OOBE is completed even when there's no such marker file, etc.
 MockSystemState::MockSystemState()
-  : default_request_params_(this),
-    prefs_(&mock_prefs_) {
-  request_params_ = &default_request_params_;
-  mock_payload_state_.Initialize(&mock_prefs_);
-  mock_update_attempter_.reset(
-      new testing::NiceMock<UpdateAttempterMock>(this, &dbus_));
+    : default_request_params_(this),
+      prefs_(&mock_prefs_)
+{
+    request_params_ = &default_request_params_;
+    mock_payload_state_.Initialize(&mock_prefs_);
+    mock_update_attempter_.reset(
+        new testing::NiceMock<UpdateAttempterMock>(this, &dbus_));
 }
 
-UpdateAttempter* MockSystemState::update_attempter() {
-  return mock_update_attempter_.get();
+UpdateAttempter *MockSystemState::update_attempter()
+{
+    return mock_update_attempter_.get();
 }
 
 } // namespeace chromeos_update_engine

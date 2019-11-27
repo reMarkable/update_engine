@@ -26,102 +26,106 @@ namespace files {
 //                              FILE_PATH_LITERAL("*.txt"));
 //   for (files::FilePath name = enum.Next(); !name.empty(); name = enum.Next())
 //     ...
-class FileEnumerator {
- public:
-  // Note: copy & assign supported.
-  class FileInfo {
-   public:
-    FileInfo();
-    ~FileInfo();
+class FileEnumerator
+{
+public:
+    // Note: copy & assign supported.
+    class FileInfo
+    {
+    public:
+        FileInfo();
+        ~FileInfo();
 
-    bool IsDirectory() const;
+        bool IsDirectory() const;
 
-    // The name of the file. This will not include any path information. This
-    // is in constrast to the value returned by FileEnumerator.Next() which
-    // includes the |root_path| passed into the FileEnumerator constructor.
-    FilePath GetName() const;
+        // The name of the file. This will not include any path information. This
+        // is in constrast to the value returned by FileEnumerator.Next() which
+        // includes the |root_path| passed into the FileEnumerator constructor.
+        FilePath GetName() const;
 
-    off_t GetSize() const;
+        off_t GetSize() const;
 
-    const struct stat& stat() const { return stat_; }
+        const struct stat &stat() const {
+            return stat_;
+        }
 
-   private:
-    friend class FileEnumerator;
+    private:
+        friend class FileEnumerator;
 
-    struct stat stat_;
-    FilePath filename_;
-  };
+        struct stat stat_;
+        FilePath filename_;
+    };
 
-  enum FileType {
-    FILES                 = 1 << 0,
-    DIRECTORIES           = 1 << 1,
-    INCLUDE_DOT_DOT       = 1 << 2,
-    SHOW_SYM_LINKS        = 1 << 4,
-  };
+    enum FileType {
+        FILES                 = 1 << 0,
+        DIRECTORIES           = 1 << 1,
+        INCLUDE_DOT_DOT       = 1 << 2,
+        SHOW_SYM_LINKS        = 1 << 4,
+    };
 
-  // |root_path| is the starting directory to search for. It may or may not end
-  // in a slash.
-  //
-  // If |recursive| is true, this will enumerate all matches in any
-  // subdirectories matched as well. It does a breadth-first search, so all
-  // files in one directory will be returned before any files in a
-  // subdirectory.
-  //
-  // |file_type|, a bit mask of FileType, specifies whether the enumerator
-  // should match files, directories, or both.
-  //
-  // |pattern| is an optional pattern for which files to match. This
-  // works like shell globbing. For example, "*.txt" or "Foo???.doc".
-  // However, be careful in specifying patterns that aren't cross platform
-  // since the underlying code uses OS-specific matching routines.  In general,
-  // Windows matching is less featureful than others, so test there first.
-  // If unspecified, this will match all files.
-  // NOTE: the pattern only matches the contents of root_path, not files in
-  // recursive subdirectories.
-  // TODO(erikkay): Fix the pattern matching to work at all levels.
-  FileEnumerator(const FilePath& root_path,
-                 bool recursive,
-                 int file_type);
-  FileEnumerator(const FilePath& root_path,
-                 bool recursive,
-                 int file_type,
-                 const FilePath::StringType& pattern);
-  ~FileEnumerator();
+    // |root_path| is the starting directory to search for. It may or may not end
+    // in a slash.
+    //
+    // If |recursive| is true, this will enumerate all matches in any
+    // subdirectories matched as well. It does a breadth-first search, so all
+    // files in one directory will be returned before any files in a
+    // subdirectory.
+    //
+    // |file_type|, a bit mask of FileType, specifies whether the enumerator
+    // should match files, directories, or both.
+    //
+    // |pattern| is an optional pattern for which files to match. This
+    // works like shell globbing. For example, "*.txt" or "Foo???.doc".
+    // However, be careful in specifying patterns that aren't cross platform
+    // since the underlying code uses OS-specific matching routines.  In general,
+    // Windows matching is less featureful than others, so test there first.
+    // If unspecified, this will match all files.
+    // NOTE: the pattern only matches the contents of root_path, not files in
+    // recursive subdirectories.
+    // TODO(erikkay): Fix the pattern matching to work at all levels.
+    FileEnumerator(const FilePath &root_path,
+                   bool recursive,
+                   int file_type);
+    FileEnumerator(const FilePath &root_path,
+                   bool recursive,
+                   int file_type,
+                   const FilePath::StringType &pattern);
+    ~FileEnumerator();
 
-  // Returns the next file or an empty string if there are no more results.
-  //
-  // The returned path will incorporate the |root_path| passed in the
-  // constructor: "<root_path>/file_name.txt". If the |root_path| is absolute,
-  // then so will be the result of Next().
-  FilePath Next();
+    // Returns the next file or an empty string if there are no more results.
+    //
+    // The returned path will incorporate the |root_path| passed in the
+    // constructor: "<root_path>/file_name.txt". If the |root_path| is absolute,
+    // then so will be the result of Next().
+    FilePath Next();
 
-  // Write the file info into |info|.
-  FileInfo GetInfo() const;
+    // Write the file info into |info|.
+    FileInfo GetInfo() const;
 
- private:
-  // Returns true if the given path should be skipped in enumeration.
-  bool ShouldSkip(const FilePath& path);
+private:
+    // Returns true if the given path should be skipped in enumeration.
+    bool ShouldSkip(const FilePath &path);
 
-  // Read the filenames in source into the vector of DirectoryEntryInfo's
-  static bool ReadDirectory(std::vector<FileInfo>* entries,
-                            const FilePath& source, bool show_links);
+    // Read the filenames in source into the vector of DirectoryEntryInfo's
+    static bool ReadDirectory(std::vector<FileInfo> *entries,
+                              const FilePath &source, bool show_links);
 
-  // The files in the current directory
-  std::vector<FileInfo> directory_entries_;
+    // The files in the current directory
+    std::vector<FileInfo> directory_entries_;
 
-  // The next entry to use from the directory_entries_ vector
-  size_t current_directory_entry_;
+    // The next entry to use from the directory_entries_ vector
+    size_t current_directory_entry_;
 
-  FilePath root_path_;
-  bool recursive_;
-  int file_type_;
-  FilePath::StringType pattern_;  // Empty when we want to find everything.
+    FilePath root_path_;
+    bool recursive_;
+    int file_type_;
+    FilePath::StringType pattern_;  // Empty when we want to find everything.
 
-  // A stack that keeps track of which subdirectories we still need to
-  // enumerate in the breadth-first search.
-  std::stack<FilePath> pending_paths_;
+    // A stack that keeps track of which subdirectories we still need to
+    // enumerate in the breadth-first search.
+    std::stack<FilePath> pending_paths_;
 
-  DISALLOW_COPY_AND_ASSIGN(FileEnumerator);
+    DISALLOW_COPY_AND_ASSIGN(FileEnumerator);
 };
 
 }  // namespace files

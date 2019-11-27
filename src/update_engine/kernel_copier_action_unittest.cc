@@ -17,127 +17,133 @@ namespace chromeos_update_engine {
 
 class KernelCopierActionTest : public ::testing::Test { };
 
-TEST(KernelCopierActionTest, SuccessfulCopyTest) {
-  const int kDefaultKernelSize = 500;
-  string a_file;
-  string b_file;
+TEST(KernelCopierActionTest, SuccessfulCopyTest)
+{
+    const int kDefaultKernelSize = 500;
+    string a_file;
+    string b_file;
 
-  if (!(utils::MakeTempFile("/tmp/a_file.XXXXXX", &a_file, NULL) &&
-        utils::MakeTempFile("/tmp/b_file.XXXXXX", &b_file, NULL))) {
-    ADD_FAILURE();
-    return;
-  }
-  ScopedPathUnlinker a_file_unlinker(a_file);
-  ScopedPathUnlinker b_file_unlinker(b_file);
+    if (!(utils::MakeTempFile("/tmp/a_file.XXXXXX", &a_file, NULL) &&
+            utils::MakeTempFile("/tmp/b_file.XXXXXX", &b_file, NULL))) {
+        ADD_FAILURE();
+        return;
+    }
 
-  // Make random data for a.
-  vector<char> a_data(kDefaultKernelSize);
-  FillWithData(&a_data);
-  if (!WriteFileVector(a_file, a_data)) {
-    ADD_FAILURE();
-    return;
-  }
+    ScopedPathUnlinker a_file_unlinker(a_file);
+    ScopedPathUnlinker b_file_unlinker(b_file);
 
-  LOG(INFO) << "copying: " << a_file << " -> " << b_file
-            << ", "<< kDefaultKernelSize << " bytes";
+    // Make random data for a.
+    vector<char> a_data(kDefaultKernelSize);
+    FillWithData(&a_data);
 
-  // Set up the action objects
-  ActionProcessor processor;
-  ActionTestDelegate<KernelCopierAction> delegate;
+    if (!WriteFileVector(a_file, a_data)) {
+        ADD_FAILURE();
+        return;
+    }
 
-  ObjectFeederAction<InstallPlan> feeder_action;
-  KernelCopierAction copier_action;
-  ObjectCollectorAction<InstallPlan> collector_action;
+    LOG(INFO) << "copying: " << a_file << " -> " << b_file
+              << ", " << kDefaultKernelSize << " bytes";
 
-  BondActions(&feeder_action, &copier_action);
-  BondActions(&copier_action, &collector_action);
+    // Set up the action objects
+    ActionProcessor processor;
+    ActionTestDelegate<KernelCopierAction> delegate;
 
-  processor.EnqueueAction(&feeder_action);
-  processor.EnqueueAction(&copier_action);
-  processor.EnqueueAction(&collector_action);
+    ObjectFeederAction<InstallPlan> feeder_action;
+    KernelCopierAction copier_action;
+    ObjectCollectorAction<InstallPlan> collector_action;
 
-  InstallPlan install_plan;
-  install_plan.kernel_path = b_file;
-  install_plan.old_kernel_path = a_file;
-  feeder_action.set_obj(install_plan);
+    BondActions(&feeder_action, &copier_action);
+    BondActions(&copier_action, &collector_action);
 
-  delegate.RunProcessor(&processor);
-  EXPECT_TRUE(delegate.ran());
-  EXPECT_EQ(kActionCodeSuccess, delegate.code());
+    processor.EnqueueAction(&feeder_action);
+    processor.EnqueueAction(&copier_action);
+    processor.EnqueueAction(&collector_action);
 
-  vector<char> a_out, b_out;
-  EXPECT_TRUE(utils::ReadFile(a_file, &a_out)) << "file failed: " << a_file;
-  EXPECT_TRUE(utils::ReadFile(b_file, &b_out)) << "file failed: " << b_file;
-  EXPECT_EQ(a_data, a_out);
-  EXPECT_EQ(a_data, b_out);
+    InstallPlan install_plan;
+    install_plan.kernel_path = b_file;
+    install_plan.old_kernel_path = a_file;
+    feeder_action.set_obj(install_plan);
 
-  EXPECT_EQ(collector_action.object(), install_plan);
-  EXPECT_FALSE(collector_action.object().old_kernel_hash.empty());
+    delegate.RunProcessor(&processor);
+    EXPECT_TRUE(delegate.ran());
+    EXPECT_EQ(kActionCodeSuccess, delegate.code());
 
-  vector<char> expect_hash;
-  EXPECT_TRUE(OmahaHashCalculator::RawHashOfData(a_data, &expect_hash));
-  EXPECT_EQ(expect_hash, collector_action.object().old_kernel_hash);
+    vector<char> a_out, b_out;
+    EXPECT_TRUE(utils::ReadFile(a_file, &a_out)) << "file failed: " << a_file;
+    EXPECT_TRUE(utils::ReadFile(b_file, &b_out)) << "file failed: " << b_file;
+    EXPECT_EQ(a_data, a_out);
+    EXPECT_EQ(a_data, b_out);
+
+    EXPECT_EQ(collector_action.object(), install_plan);
+    EXPECT_FALSE(collector_action.object().old_kernel_hash.empty());
+
+    vector<char> expect_hash;
+    EXPECT_TRUE(OmahaHashCalculator::RawHashOfData(a_data, &expect_hash));
+    EXPECT_EQ(expect_hash, collector_action.object().old_kernel_hash);
 }
 
-TEST(KernelCopierActionTest, MissingInputObjectTest) {
-  ActionProcessor processor;
-  ActionTestDelegate<KernelCopierAction> delegate;
+TEST(KernelCopierActionTest, MissingInputObjectTest)
+{
+    ActionProcessor processor;
+    ActionTestDelegate<KernelCopierAction> delegate;
 
-  KernelCopierAction copier_action;
-  ObjectCollectorAction<InstallPlan> collector_action;
+    KernelCopierAction copier_action;
+    ObjectCollectorAction<InstallPlan> collector_action;
 
-  BondActions(&copier_action, &collector_action);
+    BondActions(&copier_action, &collector_action);
 
-  processor.EnqueueAction(&copier_action);
-  processor.EnqueueAction(&collector_action);
-  delegate.RunProcessor(&processor);
-  EXPECT_TRUE(delegate.ran());
-  EXPECT_EQ(kActionCodeError, delegate.code());
+    processor.EnqueueAction(&copier_action);
+    processor.EnqueueAction(&collector_action);
+    delegate.RunProcessor(&processor);
+    EXPECT_TRUE(delegate.ran());
+    EXPECT_EQ(kActionCodeError, delegate.code());
 }
 
-TEST(KernelCopierActionTest, ResumeTest) {
-  ActionProcessor processor;
-  ActionTestDelegate<KernelCopierAction> delegate;
+TEST(KernelCopierActionTest, ResumeTest)
+{
+    ActionProcessor processor;
+    ActionTestDelegate<KernelCopierAction> delegate;
 
-  ObjectFeederAction<InstallPlan> feeder_action;
-  const char* kUrl = "http://some/url";
-  InstallPlan install_plan(true, kUrl, 0, "", "");
-  feeder_action.set_obj(install_plan);
-  KernelCopierAction copier_action;
-  ObjectCollectorAction<InstallPlan> collector_action;
+    ObjectFeederAction<InstallPlan> feeder_action;
+    const char *kUrl = "http://some/url";
+    InstallPlan install_plan(true, kUrl, 0, "", "");
+    feeder_action.set_obj(install_plan);
+    KernelCopierAction copier_action;
+    ObjectCollectorAction<InstallPlan> collector_action;
 
-  BondActions(&feeder_action, &copier_action);
-  BondActions(&copier_action, &collector_action);
+    BondActions(&feeder_action, &copier_action);
+    BondActions(&copier_action, &collector_action);
 
-  processor.EnqueueAction(&feeder_action);
-  processor.EnqueueAction(&copier_action);
-  processor.EnqueueAction(&collector_action);
-  delegate.RunProcessor(&processor);
-  EXPECT_TRUE(delegate.ran());
-  EXPECT_EQ(kActionCodeSuccess, delegate.code());
-  EXPECT_EQ(kUrl, collector_action.object().download_url);
+    processor.EnqueueAction(&feeder_action);
+    processor.EnqueueAction(&copier_action);
+    processor.EnqueueAction(&collector_action);
+    delegate.RunProcessor(&processor);
+    EXPECT_TRUE(delegate.ran());
+    EXPECT_EQ(kActionCodeSuccess, delegate.code());
+    EXPECT_EQ(kUrl, collector_action.object().download_url);
 }
 
-TEST(KernelCopierActionTest, MissingSourceFile) {
-  ActionProcessor processor;
-  ActionTestDelegate<KernelCopierAction> delegate;
+TEST(KernelCopierActionTest, MissingSourceFile)
+{
+    ActionProcessor processor;
+    ActionTestDelegate<KernelCopierAction> delegate;
 
-  ObjectFeederAction<InstallPlan> feeder_action;
-  InstallPlan install_plan;
-  install_plan.kernel_path = "/no/such/file";
-  install_plan.old_kernel_path = "/also/no/such/file";
-  feeder_action.set_obj(install_plan);
-  KernelCopierAction copier_action;
-  ObjectCollectorAction<InstallPlan> collector_action;
+    ObjectFeederAction<InstallPlan> feeder_action;
+    InstallPlan install_plan;
+    install_plan.kernel_path = "/no/such/file";
+    install_plan.old_kernel_path = "/also/no/such/file";
+    feeder_action.set_obj(install_plan);
+    KernelCopierAction copier_action;
+    ObjectCollectorAction<InstallPlan> collector_action;
 
-  BondActions(&copier_action, &collector_action);
+    BondActions(&copier_action, &collector_action);
 
-  processor.EnqueueAction(&feeder_action);
-  processor.EnqueueAction(&copier_action);
-  processor.EnqueueAction(&collector_action);
-  delegate.RunProcessor(&processor);
-  EXPECT_TRUE(delegate.ran());
-  EXPECT_EQ(kActionCodeError, delegate.code());
+    processor.EnqueueAction(&feeder_action);
+    processor.EnqueueAction(&copier_action);
+    processor.EnqueueAction(&collector_action);
+    delegate.RunProcessor(&processor);
+    EXPECT_TRUE(delegate.ran());
+    EXPECT_EQ(kActionCodeError, delegate.code());
 }
 
 }  // namespace chromeos_update_engine

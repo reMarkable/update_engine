@@ -19,40 +19,51 @@ class PostinstallRunnerAction;
 class NoneType;
 
 template<>
-class ActionTraits<PostinstallRunnerAction> {
- public:
-  // Takes the device path as input
-  typedef InstallPlan InputObjectType;
-  // Passes the device path as output
-  typedef InstallPlan OutputObjectType;
+class ActionTraits<PostinstallRunnerAction>
+{
+public:
+    // Takes the device path as input
+    typedef InstallPlan InputObjectType;
+    // Passes the device path as output
+    typedef InstallPlan OutputObjectType;
 };
 
-class PostinstallRunnerAction : public Action<PostinstallRunnerAction> {
- public:
-  PostinstallRunnerAction() {}
-  typedef ActionTraits<PostinstallRunnerAction>::InputObjectType
-      InputObjectType;
-  typedef ActionTraits<PostinstallRunnerAction>::OutputObjectType
-      OutputObjectType;
-  void PerformAction();
+class PostinstallRunnerAction : public Action<PostinstallRunnerAction>
+{
+public:
+    PostinstallRunnerAction() {}
+    typedef ActionTraits<PostinstallRunnerAction>::InputObjectType
+    InputObjectType;
+    typedef ActionTraits<PostinstallRunnerAction>::OutputObjectType
+    OutputObjectType;
+    void PerformAction();
 
-  // Note that there's no support for terminating this action currently.
-  void TerminateProcessing() { CHECK(false); }
+    // Note that there's no support for terminating this action currently.
+    void TerminateProcessing()
+    {
+        CHECK(false);
+    }
 
-  // Debugging/logging
-  static std::string StaticType() { return "PostinstallRunnerAction"; }
-  std::string Type() const { return StaticType(); }
+    // Debugging/logging
+    static std::string StaticType()
+    {
+        return "PostinstallRunnerAction";
+    }
+    std::string Type() const
+    {
+        return StaticType();
+    }
 
- private:
-  // Subprocess::Exec callback.
-  void CompletePostinstall(int return_code);
-  static void StaticCompletePostinstall(int return_code,
-                                        const std::string& output,
-                                        void* p);
+private:
+    // Subprocess::Exec callback.
+    void CompletePostinstall(int return_code);
+    static void StaticCompletePostinstall(int return_code,
+                                          const std::string &output,
+                                          void *p);
 
-  std::string temp_rootfs_dir_;
+    std::string temp_rootfs_dir_;
 
-  DISALLOW_COPY_AND_ASSIGN(PostinstallRunnerAction);
+    DISALLOW_COPY_AND_ASSIGN(PostinstallRunnerAction);
 };
 
 }  // namespace chromeos_update_engine

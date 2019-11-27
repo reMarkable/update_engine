@@ -24,23 +24,24 @@ class UpdateAttempter;
 // Currently it has only one method, but we should start migrating other
 // methods to use this as and when needed to unit test them.
 // TODO (jaysri): Consider renaming this to something like GlobalContext.
-class SystemState {
- public:
-  // Destructs this object.
-  virtual ~SystemState() {}
+class SystemState
+{
+public:
+    // Destructs this object.
+    virtual ~SystemState() {}
 
-  // Gets the interface object for persisted store.
-  virtual PrefsInterface* prefs() = 0;
+    // Gets the interface object for persisted store.
+    virtual PrefsInterface *prefs() = 0;
 
-  // Gets the interface for the payload state object.
-  virtual PayloadStateInterface* payload_state() = 0;
+    // Gets the interface for the payload state object.
+    virtual PayloadStateInterface *payload_state() = 0;
 
-  // Returns a pointer to the update attempter object.
-  virtual UpdateAttempter* update_attempter() = 0;
+    // Returns a pointer to the update attempter object.
+    virtual UpdateAttempter *update_attempter() = 0;
 
-  // Returns a pointer to the object that stores the parameters that are
-  // common to all Omaha requests.
-  virtual OmahaRequestParams* request_params() = 0;
+    // Returns a pointer to the object that stores the parameters that are
+    // common to all Omaha requests.
+    virtual OmahaRequestParams *request_params() = 0;
 };
 
 }  // namespace chromeos_update_engine

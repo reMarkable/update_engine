@@ -17,37 +17,38 @@ namespace chromeos_update_engine {
 // a key in a separate file named after the key under a preference
 // store directory.
 
-class Prefs : public PrefsInterface {
- public:
-  Prefs() {}
+class Prefs : public PrefsInterface
+{
+public:
+    Prefs() {}
 
-  // Initializes the store by associating this object with |prefs_dir|
-  // as the preference store directory. Returns true on success, false
-  // otherwise.
-  bool Init(const files::FilePath& prefs_dir);
+    // Initializes the store by associating this object with |prefs_dir|
+    // as the preference store directory. Returns true on success, false
+    // otherwise.
+    bool Init(const files::FilePath &prefs_dir);
 
-  // PrefsInterface methods.
-  bool GetString(const std::string& key, std::string* value);
-  bool SetString(const std::string& key, const std::string& value);
-  bool GetInt64(const std::string& key, int64_t* value);
-  bool SetInt64(const std::string& key, const int64_t value);
+    // PrefsInterface methods.
+    bool GetString(const std::string &key, std::string *value);
+    bool SetString(const std::string &key, const std::string &value);
+    bool GetInt64(const std::string &key, int64_t *value);
+    bool SetInt64(const std::string &key, const int64_t value);
 
-  bool Exists(const std::string& key);
-  bool Delete(const std::string& key);
+    bool Exists(const std::string &key);
+    bool Delete(const std::string &key);
 
- private:
-  FRIEND_TEST(PrefsTest, GetFileNameForKey);
-  FRIEND_TEST(PrefsTest, GetFileNameForKeyBadCharacter);
-  FRIEND_TEST(PrefsTest, GetFileNameForKeyEmpty);
+private:
+    FRIEND_TEST(PrefsTest, GetFileNameForKey);
+    FRIEND_TEST(PrefsTest, GetFileNameForKeyBadCharacter);
+    FRIEND_TEST(PrefsTest, GetFileNameForKeyEmpty);
 
-  // Sets |filename| to the full path to the file containing the data
-  // associated with |key|. Returns true on success, false otherwise.
-  bool GetFileNameForKey(const std::string& key, files::FilePath* filename);
+    // Sets |filename| to the full path to the file containing the data
+    // associated with |key|. Returns true on success, false otherwise.
+    bool GetFileNameForKey(const std::string &key, files::FilePath *filename);
 
-  // Preference store directory.
-  files::FilePath prefs_dir_;
+    // Preference store directory.
+    files::FilePath prefs_dir_;
 
-  DISALLOW_COPY_AND_ASSIGN(Prefs);
+    DISALLOW_COPY_AND_ASSIGN(Prefs);
 };
 
 }  // namespace chromeos_update_engine

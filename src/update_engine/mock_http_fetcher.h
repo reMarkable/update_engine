@@ -24,106 +24,117 @@ namespace chromeos_update_engine {
 // loop and when that's called, another chunk is sent down.
 const size_t kMockHttpFetcherChunkSize(65536);
 
-class MockHttpFetcher : public HttpFetcher {
- public:
-  // The data passed in here is copied and then passed to the delegate after
-  // the transfer begins.
-  MockHttpFetcher(const char* data,
-                  size_t size)
-      : HttpFetcher(),
-        sent_size_(0),
-        timeout_source_(NULL),
-        timout_tag_(0),
-        paused_(false),
-        fail_transfer_(false),
-        never_use_(false) {
-    data_.insert(data_.end(), data, data + size);
-  }
+class MockHttpFetcher : public HttpFetcher
+{
+public:
+    // The data passed in here is copied and then passed to the delegate after
+    // the transfer begins.
+    MockHttpFetcher(const char *data,
+                    size_t size)
+        : HttpFetcher(),
+          sent_size_(0),
+          timeout_source_(NULL),
+          timout_tag_(0),
+          paused_(false),
+          fail_transfer_(false),
+          never_use_(false)
+    {
+        data_.insert(data_.end(), data, data + size);
+    }
 
-  // Cleans up all internal state. Does not notify delegate
-  ~MockHttpFetcher();
+    // Cleans up all internal state. Does not notify delegate
+    ~MockHttpFetcher();
 
-  // Ignores this.
-  virtual void SetOffset(off_t offset) {
-    sent_size_ = offset;
-    if (delegate_)
-      delegate_->SeekToOffset(offset);
-  }
+    // Ignores this.
+    virtual void SetOffset(off_t offset)
+    {
+        sent_size_ = offset;
 
-  // Do nothing.
-  virtual void SetLength(size_t length) {}
-  virtual void UnsetLength() {}
+        if (delegate_) {
+            delegate_->SeekToOffset(offset);
+        }
+    }
 
-  // Dummy: no bytes were downloaded.
-  virtual size_t GetBytesDownloaded() {
-    return sent_size_;
-  }
+    // Do nothing.
+    virtual void SetLength(size_t length) {}
+    virtual void UnsetLength() {}
 
-  // Begins the transfer if it hasn't already begun.
-  virtual void BeginTransfer(const std::string& url);
+    // Dummy: no bytes were downloaded.
+    virtual size_t GetBytesDownloaded()
+    {
+        return sent_size_;
+    }
 
-  // If the transfer is in progress, aborts the transfer early.
-  // The transfer cannot be resumed.
-  virtual void TerminateTransfer();
+    // Begins the transfer if it hasn't already begun.
+    virtual void BeginTransfer(const std::string &url);
 
-  // Suspend the mock transfer.
-  virtual void Pause();
+    // If the transfer is in progress, aborts the transfer early.
+    // The transfer cannot be resumed.
+    virtual void TerminateTransfer();
 
-  // Resume the mock transfer.
-  virtual void Unpause();
+    // Suspend the mock transfer.
+    virtual void Pause();
 
-  // Fail the transfer. This simulates a network failure.
-  void FailTransfer(int http_response_code);
+    // Resume the mock transfer.
+    virtual void Unpause();
 
-  // If set to true, this will EXPECT fail on BeginTransfer
-  void set_never_use(bool never_use) { never_use_ = never_use; }
+    // Fail the transfer. This simulates a network failure.
+    void FailTransfer(int http_response_code);
 
-  const std::vector<char>& post_data() const {
-    return post_data_;
-  }
+    // If set to true, this will EXPECT fail on BeginTransfer
+    void set_never_use(bool never_use)
+    {
+        never_use_ = never_use;
+    }
 
- private:
-  // Sends data to the delegate and sets up a glib timeout callback if needed.
-  // There must be a delegate and there must be data to send. If there is
-  // already a timeout callback, and it should be deleted by the caller,
-  // this will return false; otherwise true is returned.
-  // If skip_delivery is true, no bytes will be delivered, but the callbacks
-  // still still be set if needed
-  bool SendData(bool skip_delivery);
+    const std::vector<char> &post_data() const
+    {
+        return post_data_;
+    }
 
-  // Callback for when our glib main loop callback is called
-  bool TimeoutCallback();
-  static gboolean StaticTimeoutCallback(gpointer data) {
-    return reinterpret_cast<MockHttpFetcher*>(data)->TimeoutCallback();
-  }
+private:
+    // Sends data to the delegate and sets up a glib timeout callback if needed.
+    // There must be a delegate and there must be data to send. If there is
+    // already a timeout callback, and it should be deleted by the caller,
+    // this will return false; otherwise true is returned.
+    // If skip_delivery is true, no bytes will be delivered, but the callbacks
+    // still still be set if needed
+    bool SendData(bool skip_delivery);
 
-  // Sets the HTTP response code and signals to the delegate that the transfer
-  // is complete.
-  void SignalTransferComplete();
+    // Callback for when our glib main loop callback is called
+    bool TimeoutCallback();
+    static gboolean StaticTimeoutCallback(gpointer data)
+    {
+        return reinterpret_cast<MockHttpFetcher *>(data)->TimeoutCallback();
+    }
 
-  // A full copy of the data we'll return to the delegate
-  std::vector<char> data_;
+    // Sets the HTTP response code and signals to the delegate that the transfer
+    // is complete.
+    void SignalTransferComplete();
 
-  // The number of bytes we've sent so far
-  size_t sent_size_;
+    // A full copy of the data we'll return to the delegate
+    std::vector<char> data_;
 
-  // The glib main loop timeout source. After each chunk of data sent, we
-  // time out for 0s just to make sure that run loop services other clients.
-  GSource* timeout_source_;
+    // The number of bytes we've sent so far
+    size_t sent_size_;
 
-  // ID of the timeout source, valid only if timeout_source_ != NULL
-  guint timout_tag_;
+    // The glib main loop timeout source. After each chunk of data sent, we
+    // time out for 0s just to make sure that run loop services other clients.
+    GSource *timeout_source_;
 
-  // True iff the fetcher is paused.
-  bool paused_;
+    // ID of the timeout source, valid only if timeout_source_ != NULL
+    guint timout_tag_;
 
-  // Set to true if the transfer should fail.
-  bool fail_transfer_;
+    // True iff the fetcher is paused.
+    bool paused_;
 
-  // Set to true if BeginTransfer should EXPECT fail.
-  bool never_use_;
+    // Set to true if the transfer should fail.
+    bool fail_transfer_;
 
-  DISALLOW_COPY_AND_ASSIGN(MockHttpFetcher);
+    // Set to true if BeginTransfer should EXPECT fail.
+    bool never_use_;
+
+    DISALLOW_COPY_AND_ASSIGN(MockHttpFetcher);
 };
 
 }  // namespace chromeos_update_engine

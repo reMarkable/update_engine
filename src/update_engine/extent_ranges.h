@@ -23,49 +23,57 @@
 namespace chromeos_update_engine {
 
 struct ExtentLess {
-  bool operator()(const Extent& x, const Extent& y) const {
-    return x.start_block() < y.start_block();
-  }
+    bool operator()(const Extent &x, const Extent &y) const
+    {
+        return x.start_block() < y.start_block();
+    }
 };
 
 Extent ExtentForRange(uint64_t start_block, uint64_t num_blocks);
 
-class ExtentRanges {
- public:
-  typedef std::set<Extent, ExtentLess> ExtentSet;
+class ExtentRanges
+{
+public:
+    typedef std::set<Extent, ExtentLess> ExtentSet;
 
-  ExtentRanges() : blocks_(0) {}
-  void AddBlock(uint64_t block);
-  void SubtractBlock(uint64_t block);
-  void AddExtent(Extent extent);
-  void SubtractExtent(const Extent& extent);
-  void AddExtents(const std::vector<Extent>& extents);
-  void SubtractExtents(const std::vector<Extent>& extents);
-  void AddRepeatedExtents(
-      const ::google::protobuf::RepeatedPtrField<Extent> &exts);
-  void SubtractRepeatedExtents(
-      const ::google::protobuf::RepeatedPtrField<Extent> &exts);
-  void AddRanges(const ExtentRanges& ranges);
-  void SubtractRanges(const ExtentRanges& ranges);
+    ExtentRanges() : blocks_(0) {}
+    void AddBlock(uint64_t block);
+    void SubtractBlock(uint64_t block);
+    void AddExtent(Extent extent);
+    void SubtractExtent(const Extent &extent);
+    void AddExtents(const std::vector<Extent> &extents);
+    void SubtractExtents(const std::vector<Extent> &extents);
+    void AddRepeatedExtents(
+        const ::google::protobuf::RepeatedPtrField<Extent> &exts);
+    void SubtractRepeatedExtents(
+        const ::google::protobuf::RepeatedPtrField<Extent> &exts);
+    void AddRanges(const ExtentRanges &ranges);
+    void SubtractRanges(const ExtentRanges &ranges);
 
-  static bool ExtentsOverlapOrTouch(const Extent& a, const Extent& b);
-  static bool ExtentsOverlap(const Extent& a, const Extent& b);
+    static bool ExtentsOverlapOrTouch(const Extent &a, const Extent &b);
+    static bool ExtentsOverlap(const Extent &a, const Extent &b);
 
-  // Dumps contents to the log file. Useful for debugging.
-  void Dump() const;
+    // Dumps contents to the log file. Useful for debugging.
+    void Dump() const;
 
-  uint64_t blocks() const { return blocks_; }
-  const ExtentSet& extent_set() const { return extent_set_; }
+    uint64_t blocks() const
+    {
+        return blocks_;
+    }
+    const ExtentSet &extent_set() const
+    {
+        return extent_set_;
+    }
 
-  // Returns an ordered vector of extents for |count| blocks,
-  // using extents in extent_set_. The returned extents are not
-  // removed from extent_set_. |count| must be less than or equal to
-  // the number of blocks in this extent set.
-  std::vector<Extent> GetExtentsForBlockCount(uint64_t count) const;
+    // Returns an ordered vector of extents for |count| blocks,
+    // using extents in extent_set_. The returned extents are not
+    // removed from extent_set_. |count| must be less than or equal to
+    // the number of blocks in this extent set.
+    std::vector<Extent> GetExtentsForBlockCount(uint64_t count) const;
 
- private:
-  ExtentSet extent_set_;
-  uint64_t blocks_;
+private:
+    ExtentSet extent_set_;
+    uint64_t blocks_;
 };
 
 }  // namespace chromeos_update_engine

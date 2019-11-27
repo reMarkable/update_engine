@@ -17,7 +17,7 @@ namespace internal {
 
 // Functor for |ScopedFILE| (below).
 struct ScopedFILECloser {
-  void operator()(FILE* x) const;
+    void operator()(FILE *x) const;
 };
 
 }  // namespace internal
@@ -26,17 +26,24 @@ struct ScopedFILECloser {
 typedef std::unique_ptr<FILE, internal::ScopedFILECloser> ScopedFILE;
 
 // Automatically closes a file descriptor.
-class ScopedFD {
- public:
-  explicit ScopedFD(int fd) : fd_(fd) {}
-  ~ScopedFD();
+class ScopedFD
+{
+public:
+    explicit ScopedFD(int fd) : fd_(fd) {}
+    ~ScopedFD();
 
-  int get() const { return fd_; }
-  bool is_valid() const { return fd_ >= 0; }
+    int get() const
+    {
+        return fd_;
+    }
+    bool is_valid() const
+    {
+        return fd_ >= 0;
+    }
 
- private:
-  int fd_;
-  DISALLOW_IMPLICIT_CONSTRUCTORS(ScopedFD);
+private:
+    int fd_;
+    DISALLOW_IMPLICIT_CONSTRUCTORS(ScopedFD);
 };
 
 }  // namespace files

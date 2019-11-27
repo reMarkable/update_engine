@@ -32,40 +32,40 @@
 G_BEGIN_DECLS
 
 struct UpdateEngineService {
-  GObject parent_instance;
+    GObject parent_instance;
 
-  chromeos_update_engine::SystemState* system_state_;
+    chromeos_update_engine::SystemState *system_state_;
 };
 
 struct UpdateEngineServiceClass {
-  GObjectClass parent_class;
+    GObjectClass parent_class;
 };
 
-UpdateEngineService* update_engine_service_new(void);
+UpdateEngineService *update_engine_service_new(void);
 GType update_engine_service_get_type(void);
 
 // Methods
 
-gboolean update_engine_service_attempt_update(UpdateEngineService* self,
-                                              GError **error);
+gboolean update_engine_service_attempt_update(UpdateEngineService *self,
+        GError **error);
 
-gboolean update_engine_service_reset_status(UpdateEngineService* self,
-                                            GError **error);
+gboolean update_engine_service_reset_status(UpdateEngineService *self,
+        GError **error);
 
-gboolean update_engine_service_get_status(UpdateEngineService* self,
-                                          int64_t* last_checked_time,
-                                          double* progress,
-                                          gchar** current_operation,
-                                          gchar** new_version,
-                                          int64_t* new_size,
-                                          GError **error);
+gboolean update_engine_service_get_status(UpdateEngineService *self,
+        int64_t *last_checked_time,
+        double *progress,
+        gchar **current_operation,
+        gchar **new_version,
+        int64_t *new_size,
+        GError **error);
 
 gboolean update_engine_service_emit_status_update(
-    UpdateEngineService* self,
+    UpdateEngineService *self,
     gint64 last_checked_time,
     gdouble progress,
-    const gchar* current_operation,
-    const gchar* new_version,
+    const gchar *current_operation,
+    const gchar *new_version,
     gint64 new_size);
 
 G_END_DECLS

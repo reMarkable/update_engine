@@ -25,149 +25,168 @@ using strings::StringPrintf;
 
 namespace chromeos_update_engine {
 
-class SubprocessTest : public ::testing::Test {
- protected:
-  bool callback_done;
+class SubprocessTest : public ::testing::Test
+{
+protected:
+    bool callback_done;
 };
 
 namespace {
 const int kLocalHttpPort = 8088;
 
-void Callback(int return_code, const string& output, void *p) {
-  EXPECT_EQ(1, return_code);
-  GMainLoop* loop = reinterpret_cast<GMainLoop*>(p);
-  g_main_loop_quit(loop);
+void Callback(int return_code, const string &output, void *p)
+{
+    EXPECT_EQ(1, return_code);
+    GMainLoop *loop = reinterpret_cast<GMainLoop *>(p);
+    g_main_loop_quit(loop);
 }
 
-void CallbackEcho(int return_code, const string& output, void *p) {
-  EXPECT_EQ(0, return_code);
-  EXPECT_NE(string::npos, output.find("this is stdout"));
-  EXPECT_NE(string::npos, output.find("this is stderr"));
-  GMainLoop* loop = reinterpret_cast<GMainLoop*>(p);
-  g_main_loop_quit(loop);
+void CallbackEcho(int return_code, const string &output, void *p)
+{
+    EXPECT_EQ(0, return_code);
+    EXPECT_NE(string::npos, output.find("this is stdout"));
+    EXPECT_NE(string::npos, output.find("this is stderr"));
+    GMainLoop *loop = reinterpret_cast<GMainLoop *>(p);
+    g_main_loop_quit(loop);
 }
 
-gboolean LaunchFalseInMainLoop(gpointer data) {
-  vector<string> cmd;
-  cmd.push_back("/bin/false");
-  Subprocess::Get().Exec(cmd, Callback, data);
-  return FALSE;
+gboolean LaunchFalseInMainLoop(gpointer data)
+{
+    vector<string> cmd;
+    cmd.push_back("/bin/false");
+    Subprocess::Get().Exec(cmd, Callback, data);
+    return FALSE;
 }
 
-gboolean LaunchEchoInMainLoop(gpointer data) {
-  vector<string> cmd;
-  cmd.push_back("/bin/sh");
-  cmd.push_back("-c");
-  cmd.push_back("echo this is stdout; echo this is stderr > /dev/stderr");
-  Subprocess::Get().Exec(cmd, CallbackEcho, data);
-  return FALSE;
+gboolean LaunchEchoInMainLoop(gpointer data)
+{
+    vector<string> cmd;
+    cmd.push_back("/bin/sh");
+    cmd.push_back("-c");
+    cmd.push_back("echo this is stdout; echo this is stderr > /dev/stderr");
+    Subprocess::Get().Exec(cmd, CallbackEcho, data);
+    return FALSE;
 }
 }  // namespace {}
 
-TEST(SubprocessTest, SimpleTest) {
-  GMainLoop *loop = g_main_loop_new(g_main_context_default(), FALSE);
-  g_timeout_add(0, &LaunchFalseInMainLoop, loop);
-  g_main_loop_run(loop);
-  g_main_loop_unref(loop);
+TEST(SubprocessTest, SimpleTest)
+{
+    GMainLoop *loop = g_main_loop_new(g_main_context_default(), FALSE);
+    g_timeout_add(0, &LaunchFalseInMainLoop, loop);
+    g_main_loop_run(loop);
+    g_main_loop_unref(loop);
 }
 
-TEST(SubprocessTest, EchoTest) {
-  GMainLoop *loop = g_main_loop_new(g_main_context_default(), FALSE);
-  g_timeout_add(0, &LaunchEchoInMainLoop, loop);
-  g_main_loop_run(loop);
-  g_main_loop_unref(loop);
+TEST(SubprocessTest, EchoTest)
+{
+    GMainLoop *loop = g_main_loop_new(g_main_context_default(), FALSE);
+    g_timeout_add(0, &LaunchEchoInMainLoop, loop);
+    g_main_loop_run(loop);
+    g_main_loop_unref(loop);
 }
 
-TEST(SubprocessTest, SynchronousEchoTest) {
-  vector<string> cmd;
-  cmd.push_back("/bin/sh");
-  cmd.push_back("-c");
-  cmd.push_back("echo -n stdout-here; echo -n stderr-there > /dev/stderr");
-  int rc = -1;
-  string stdout;
-  ASSERT_TRUE(Subprocess::SynchronousExec(cmd, &rc, &stdout));
-  EXPECT_EQ(0, rc);
-  EXPECT_EQ("stdout-herestderr-there", stdout);
+TEST(SubprocessTest, SynchronousEchoTest)
+{
+    vector<string> cmd;
+    cmd.push_back("/bin/sh");
+    cmd.push_back("-c");
+    cmd.push_back("echo -n stdout-here; echo -n stderr-there > /dev/stderr");
+    int rc = -1;
+    string stdout;
+    ASSERT_TRUE(Subprocess::SynchronousExec(cmd, &rc, &stdout));
+    EXPECT_EQ(0, rc);
+    EXPECT_EQ("stdout-herestderr-there", stdout);
 }
 
-TEST(SubprocessTest, SynchronousEchoNoOutputTest) {
-  vector<string> cmd;
-  cmd.push_back("/bin/sh");
-  cmd.push_back("-c");
-  cmd.push_back("echo test");
-  int rc = -1;
-  ASSERT_TRUE(Subprocess::SynchronousExec(cmd, &rc, NULL));
-  EXPECT_EQ(0, rc);
+TEST(SubprocessTest, SynchronousEchoNoOutputTest)
+{
+    vector<string> cmd;
+    cmd.push_back("/bin/sh");
+    cmd.push_back("-c");
+    cmd.push_back("echo test");
+    int rc = -1;
+    ASSERT_TRUE(Subprocess::SynchronousExec(cmd, &rc, NULL));
+    EXPECT_EQ(0, rc);
 }
 
 namespace {
-void CallbackBad(int return_code, const string& output, void *p) {
-  CHECK(false) << "should never be called.";
+void CallbackBad(int return_code, const string &output, void *p)
+{
+    CHECK(false) << "should never be called.";
 }
 
 struct CancelTestData {
-  bool spawned;
-  GMainLoop *loop;
+    bool spawned;
+    GMainLoop *loop;
 };
 
-gboolean StartAndCancelInRunLoop(gpointer data) {
-  CancelTestData* cancel_test_data = reinterpret_cast<CancelTestData*>(data);
-  vector<string> cmd;
-  cmd.push_back("./test_http_server");
-  uint32_t tag = Subprocess::Get().Exec(cmd, CallbackBad, NULL);
-  EXPECT_NE(0, tag);
-  cancel_test_data->spawned = true;
-  printf("spawned\n");
-  // Wait for server to be up and running
-  std::chrono::milliseconds total_wait_time(0);
-  const std::chrono::milliseconds kSleepTime(100);
-  const std::chrono::seconds kMaxWaitTime(3);
-  for (;;) {
-    int status =
-        System(StringPrintf("wget -O /dev/null http://127.0.0.1:%d/foo",
-                            kLocalHttpPort));
-    EXPECT_NE(-1, status) << "system() failed";
-    EXPECT_TRUE(WIFEXITED(status))
-        << "command failed to run or died abnormally";
-    if (0 == WEXITSTATUS(status))
-      break;
+gboolean StartAndCancelInRunLoop(gpointer data)
+{
+    CancelTestData *cancel_test_data = reinterpret_cast<CancelTestData *>(data);
+    vector<string> cmd;
+    cmd.push_back("./test_http_server");
+    uint32_t tag = Subprocess::Get().Exec(cmd, CallbackBad, NULL);
+    EXPECT_NE(0, tag);
+    cancel_test_data->spawned = true;
+    printf("spawned\n");
+    // Wait for server to be up and running
+    std::chrono::milliseconds total_wait_time(0);
+    const std::chrono::milliseconds kSleepTime(100);
+    const std::chrono::seconds kMaxWaitTime(3);
 
-    std::this_thread::sleep_for(kSleepTime);
-    total_wait_time += kSleepTime;
-    EXPECT_LT(total_wait_time, kMaxWaitTime);
-  }
-  Subprocess::Get().CancelExec(tag);
-  return FALSE;
+    for (;;) {
+        int status =
+            System(StringPrintf("wget -O /dev/null http://127.0.0.1:%d/foo",
+                                kLocalHttpPort));
+        EXPECT_NE(-1, status) << "system() failed";
+        EXPECT_TRUE(WIFEXITED(status))
+                << "command failed to run or died abnormally";
+
+        if (0 == WEXITSTATUS(status)) {
+            break;
+        }
+
+        std::this_thread::sleep_for(kSleepTime);
+        total_wait_time += kSleepTime;
+        EXPECT_LT(total_wait_time, kMaxWaitTime);
+    }
+
+    Subprocess::Get().CancelExec(tag);
+    return FALSE;
 }
 }  // namespace {}
 
-gboolean ExitWhenDone(gpointer data) {
-  CancelTestData* cancel_test_data = reinterpret_cast<CancelTestData*>(data);
-  if (cancel_test_data->spawned && !Subprocess::Get().SubprocessInFlight()) {
-    // tear down the sub process
-    printf("tear down time\n");
-    int status = System(
-        StringPrintf("wget -O /dev/null http://127.0.0.1:%d/quitquitquit",
-                     kLocalHttpPort));
-    EXPECT_NE(-1, status) << "system() failed";
-    EXPECT_TRUE(WIFEXITED(status))
-        << "command failed to run or died abnormally";
-    g_main_loop_quit(cancel_test_data->loop);
-    return FALSE;
-  }
-  return TRUE;
+gboolean ExitWhenDone(gpointer data)
+{
+    CancelTestData *cancel_test_data = reinterpret_cast<CancelTestData *>(data);
+
+    if (cancel_test_data->spawned && !Subprocess::Get().SubprocessInFlight()) {
+        // tear down the sub process
+        printf("tear down time\n");
+        int status = System(
+                         StringPrintf("wget -O /dev/null http://127.0.0.1:%d/quitquitquit",
+                                      kLocalHttpPort));
+        EXPECT_NE(-1, status) << "system() failed";
+        EXPECT_TRUE(WIFEXITED(status))
+                << "command failed to run or died abnormally";
+        g_main_loop_quit(cancel_test_data->loop);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
-TEST(SubprocessTest, CancelTest) {
-  GMainLoop *loop = g_main_loop_new(g_main_context_default(), FALSE);
-  CancelTestData cancel_test_data;
-  cancel_test_data.spawned = false;
-  cancel_test_data.loop = loop;
-  g_timeout_add(100, &StartAndCancelInRunLoop, &cancel_test_data);
-  g_timeout_add(10, &ExitWhenDone, &cancel_test_data);
-  g_main_loop_run(loop);
-  g_main_loop_unref(loop);
-  printf("here\n");
+TEST(SubprocessTest, CancelTest)
+{
+    GMainLoop *loop = g_main_loop_new(g_main_context_default(), FALSE);
+    CancelTestData cancel_test_data;
+    cancel_test_data.spawned = false;
+    cancel_test_data.loop = loop;
+    g_timeout_add(100, &StartAndCancelInRunLoop, &cancel_test_data);
+    g_timeout_add(10, &ExitWhenDone, &cancel_test_data);
+    g_main_loop_run(loop);
+    g_main_loop_unref(loop);
+    printf("here\n");
 }
 
 }  // namespace chromeos_update_engine

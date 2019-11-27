@@ -15,40 +15,51 @@ namespace chromeos_update_engine {
 class KernelCopierAction;
 
 template<>
-class ActionTraits<KernelCopierAction> {
- public:
-  // Takes the install plan as input
-  typedef InstallPlan InputObjectType;
-  // Passes the install plan as output
-  typedef InstallPlan OutputObjectType;
+class ActionTraits<KernelCopierAction>
+{
+public:
+    // Takes the install plan as input
+    typedef InstallPlan InputObjectType;
+    // Passes the install plan as output
+    typedef InstallPlan OutputObjectType;
 };
 
-class KernelCopierAction : public Action<KernelCopierAction> {
- public:
-  KernelCopierAction() {}
+class KernelCopierAction : public Action<KernelCopierAction>
+{
+public:
+    KernelCopierAction() {}
 
-  typedef ActionTraits<KernelCopierAction>::InputObjectType
-  InputObjectType;
-  typedef ActionTraits<KernelCopierAction>::OutputObjectType
-  OutputObjectType;
-  void PerformAction();
-  void TerminateProcessing() {}
+    typedef ActionTraits<KernelCopierAction>::InputObjectType
+    InputObjectType;
+    typedef ActionTraits<KernelCopierAction>::OutputObjectType
+    OutputObjectType;
+    void PerformAction();
+    void TerminateProcessing() {}
 
-  // Used for testing, so we can copy from somewhere other than root
-  void set_copy_source(const std::string& path) { copy_source_ = path; }
+    // Used for testing, so we can copy from somewhere other than root
+    void set_copy_source(const std::string &path)
+    {
+        copy_source_ = path;
+    }
 
-  // Debugging/logging
-  static std::string StaticType() { return "KernelCopierAction"; }
-  std::string Type() const { return StaticType(); }
+    // Debugging/logging
+    static std::string StaticType()
+    {
+        return "KernelCopierAction";
+    }
+    std::string Type() const
+    {
+        return StaticType();
+    }
 
- private:
-  // The path to copy from. If empty (the default) it is auto-detected.
-  std::string copy_source_;
+private:
+    // The path to copy from. If empty (the default) it is auto-detected.
+    std::string copy_source_;
 
-  // The install plan we're passed in via the input pipe.
-  InstallPlan install_plan_;
+    // The install plan we're passed in via the input pipe.
+    InstallPlan install_plan_;
 
-  DISALLOW_COPY_AND_ASSIGN(KernelCopierAction);
+    DISALLOW_COPY_AND_ASSIGN(KernelCopierAction);
 };
 
 }  // namespace chromeos_update_engine

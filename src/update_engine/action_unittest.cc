@@ -16,47 +16,62 @@ using chromeos_update_engine::ActionPipe;
 class ActionTestAction;
 
 template<>
-class ActionTraits<ActionTestAction> {
- public:
-  typedef string OutputObjectType;
-  typedef string InputObjectType;
+class ActionTraits<ActionTestAction>
+{
+public:
+    typedef string OutputObjectType;
+    typedef string InputObjectType;
 };
 
 // This is a simple Action class for testing.
 struct ActionTestAction : public Action<ActionTestAction> {
-  typedef string InputObjectType;
-  typedef string OutputObjectType;
-  ActionPipe<string>* in_pipe() { return in_pipe_.get(); }
-  ActionPipe<string>* out_pipe() { return out_pipe_.get(); }
-  ActionProcessor* processor() { return processor_; }
-  void PerformAction() {}
-  void CompleteAction() {
-    ASSERT_TRUE(processor());
-    processor()->ActionComplete(this, kActionCodeSuccess);
-  }
-  string Type() const { return "ActionTestAction"; }
+    typedef string InputObjectType;
+    typedef string OutputObjectType;
+    ActionPipe<string> *in_pipe()
+    {
+        return in_pipe_.get();
+    }
+    ActionPipe<string> *out_pipe()
+    {
+        return out_pipe_.get();
+    }
+    ActionProcessor *processor()
+    {
+        return processor_;
+    }
+    void PerformAction() {}
+    void CompleteAction()
+    {
+        ASSERT_TRUE(processor());
+        processor()->ActionComplete(this, kActionCodeSuccess);
+    }
+    string Type() const
+    {
+        return "ActionTestAction";
+    }
 };
 
 class ActionTest : public ::testing::Test { };
 
 // This test creates two simple Actions and sends a message via an ActionPipe
 // from one to the other.
-TEST(ActionTest, SimpleTest) {
-  ActionTestAction action;
+TEST(ActionTest, SimpleTest)
+{
+    ActionTestAction action;
 
-  EXPECT_FALSE(action.in_pipe());
-  EXPECT_FALSE(action.out_pipe());
-  EXPECT_FALSE(action.processor());
-  EXPECT_FALSE(action.IsRunning());
+    EXPECT_FALSE(action.in_pipe());
+    EXPECT_FALSE(action.out_pipe());
+    EXPECT_FALSE(action.processor());
+    EXPECT_FALSE(action.IsRunning());
 
-  ActionProcessor action_processor;
-  action_processor.EnqueueAction(&action);
-  EXPECT_EQ(&action_processor, action.processor());
+    ActionProcessor action_processor;
+    action_processor.EnqueueAction(&action);
+    EXPECT_EQ(&action_processor, action.processor());
 
-  action_processor.StartProcessing();
-  EXPECT_TRUE(action.IsRunning());
-  action.CompleteAction();
-  EXPECT_FALSE(action.IsRunning());
+    action_processor.StartProcessing();
+    EXPECT_TRUE(action.IsRunning());
+    action.CompleteAction();
+    EXPECT_FALSE(action.IsRunning());
 }
 
 }  // namespace chromeos_update_engine

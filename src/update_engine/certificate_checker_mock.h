@@ -12,13 +12,14 @@
 
 namespace chromeos_update_engine {
 
-class OpenSSLWrapperMock : public OpenSSLWrapper {
- public:
-  MOCK_CONST_METHOD4(GetCertificateDigest,
-                     bool(X509_STORE_CTX* x509_ctx,
-                          int* out_depth,
-                          unsigned int* out_digest_length,
-                          unsigned char* out_digest));
+class OpenSSLWrapperMock : public OpenSSLWrapper
+{
+public:
+    MOCK_CONST_METHOD4(GetCertificateDigest,
+                       bool(X509_STORE_CTX *x509_ctx,
+                            int *out_depth,
+                            unsigned int *out_digest_length,
+                            unsigned char *out_digest));
 };
 
 }  // namespace chromeos_update_engine

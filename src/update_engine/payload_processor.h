@@ -24,138 +24,141 @@ class SystemState;
 // This class processes an update payload, dispatching install operations
 // in the manifest to FileWriters as the payload data is received.
 
-class PayloadProcessor : public FileWriter {
- public:
+class PayloadProcessor : public FileWriter
+{
+public:
 
-  static const char kUpdatePayloadPublicKeyPath[];
+    static const char kUpdatePayloadPublicKeyPath[];
 
-  PayloadProcessor(PrefsInterface* prefs, InstallPlan* install_plan);
+    PayloadProcessor(PrefsInterface *prefs, InstallPlan *install_plan);
 
-  // Once Close()d, a PayloadProcessor can't be Open()ed again.
-  int Open();
+    // Once Close()d, a PayloadProcessor can't be Open()ed again.
+    int Open();
 
-  // FileWriter's Write implementation where caller doesn't care about
-  // error codes.
-  bool Write(const void* bytes, size_t count) {
-    ActionExitCode error;
-    return Write(bytes, count, &error);
-  }
+    // FileWriter's Write implementation where caller doesn't care about
+    // error codes.
+    bool Write(const void *bytes, size_t count)
+    {
+        ActionExitCode error;
+        return Write(bytes, count, &error);
+    }
 
-  // FileWriter's Write implementation that returns a more specific |error| code
-  // in case of failures in Write operation.
-  bool Write(const void* bytes, size_t count, ActionExitCode *error);
+    // FileWriter's Write implementation that returns a more specific |error| code
+    // in case of failures in Write operation.
+    bool Write(const void *bytes, size_t count, ActionExitCode *error);
 
-  // Wrapper around close. Returns 0 on success or -errno on error.
-  int Close();
+    // Wrapper around close. Returns 0 on success or -errno on error.
+    int Close();
 
-  // Verifies the downloaded payload against the signed hash included in the
-  // payload, against the update check hash and size from the install_plan.
-  // Returns kActionCodeSuccess on success, an error code on failure.  This
-  // method should be called after closing the stream.  Note this method skips
-  // the signed hash check if the public key is unavailable; it returns
-  // kActionCodeSignedDeltaPayloadExpectedError if the public key is available
-  // but the delta payload doesn't include a signature.
-  ActionExitCode VerifyPayload();
+    // Verifies the downloaded payload against the signed hash included in the
+    // payload, against the update check hash and size from the install_plan.
+    // Returns kActionCodeSuccess on success, an error code on failure.  This
+    // method should be called after closing the stream.  Note this method skips
+    // the signed hash check if the public key is unavailable; it returns
+    // kActionCodeSignedDeltaPayloadExpectedError if the public key is available
+    // but the delta payload doesn't include a signature.
+    ActionExitCode VerifyPayload();
 
-  // Returns true if a previous update attempt can be continued based on the
-  // persistent preferences and the new update check response hash.
-  static bool CanResumeUpdate(PrefsInterface* prefs,
-                              std::string update_check_response_hash);
+    // Returns true if a previous update attempt can be continued based on the
+    // persistent preferences and the new update check response hash.
+    static bool CanResumeUpdate(PrefsInterface *prefs,
+                                std::string update_check_response_hash);
 
-  // Resets the persistent update progress state to indicate that an update
-  // can't be resumed. Performs a quick update-in-progress reset if |quick| is
-  // true, otherwise resets all progress-related update state. Returns true on
-  // success, false otherwise.
-  static bool ResetUpdateProgress(PrefsInterface* prefs, bool quick);
+    // Resets the persistent update progress state to indicate that an update
+    // can't be resumed. Performs a quick update-in-progress reset if |quick| is
+    // true, otherwise resets all progress-related update state. Returns true on
+    // success, false otherwise.
+    static bool ResetUpdateProgress(PrefsInterface *prefs, bool quick);
 
-  void set_public_key_path(const std::string& public_key_path) {
-    public_key_path_ = public_key_path;
-  }
+    void set_public_key_path(const std::string &public_key_path)
+    {
+        public_key_path_ = public_key_path;
+    }
 
- private:
-  // Parses the manifest and finishes any initialization that needs info from
-  // the manifest. Result may be kActionCodeDownloadIncomplete.
-  ActionExitCode LoadManifest();
+private:
+    // Parses the manifest and finishes any initialization that needs info from
+    // the manifest. Result may be kActionCodeDownloadIncomplete.
+    ActionExitCode LoadManifest();
 
-  // Execute a single operation. Result may be kActionCodeDownloadIncomplete.
-  ActionExitCode PerformOperation();
+    // Execute a single operation. Result may be kActionCodeDownloadIncomplete.
+    ActionExitCode PerformOperation();
 
-  // Verifies that the expected source hashes (if present) match the hash
-  // for the current partition/files. Returns true if there're no expected
-  // hash in the payload (e.g., if it's a new-style full update) or if the
-  // hashes match; returns false otherwise.
-  bool VerifySource();
+    // Verifies that the expected source hashes (if present) match the hash
+    // for the current partition/files. Returns true if there're no expected
+    // hash in the payload (e.g., if it's a new-style full update) or if the
+    // hashes match; returns false otherwise.
+    bool VerifySource();
 
-  // Returns true if the payload signature message has been extracted from
-  // payload, false otherwise.
-  bool ExtractSignatureMessage(const std::vector<char>& data);
+    // Returns true if the payload signature message has been extracted from
+    // payload, false otherwise.
+    bool ExtractSignatureMessage(const std::vector<char> &data);
 
-  // Updates the hash calculator with |count| bytes at the head of |buffer_| and
-  // then discards them.
-  void DiscardBufferHeadBytes(size_t count);
+    // Updates the hash calculator with |count| bytes at the head of |buffer_| and
+    // then discards them.
+    void DiscardBufferHeadBytes(size_t count);
 
-  // Checkpoints the update progress into persistent storage to allow this
-  // update attempt to be resumed after reboot.
-  bool CheckpointUpdateProgress();
+    // Checkpoints the update progress into persistent storage to allow this
+    // update attempt to be resumed after reboot.
+    bool CheckpointUpdateProgress();
 
-  // Primes the required update state. Returns true if the update state was
-  // successfully initialized to a saved resume state or if the update is a new
-  // update. Returns false otherwise.
-  bool PrimeUpdateState();
+    // Primes the required update state. Returns true if the update state was
+    // successfully initialized to a saved resume state or if the update is a new
+    // update. Returns false otherwise.
+    bool PrimeUpdateState();
 
-  // Fills in new partition/kernel size/hash in install_plan_ from the manifest.
-  bool SetNewPartitionInfo();
-  bool SetNewKernelInfo();
+    // Fills in new partition/kernel size/hash in install_plan_ from the manifest.
+    bool SetNewPartitionInfo();
+    bool SetNewKernelInfo();
 
-  // Writer for the main partition to be updated.
-  DeltaPerformer partition_performer_;
+    // Writer for the main partition to be updated.
+    DeltaPerformer partition_performer_;
 
-  // Writer for the boot kernel in the EFI System partition.
-  DeltaPerformer kernel_performer_;
+    // Writer for the boot kernel in the EFI System partition.
+    DeltaPerformer kernel_performer_;
 
-  // Update Engine preference store.
-  PrefsInterface* prefs_;
+    // Update Engine preference store.
+    PrefsInterface *prefs_;
 
-  // Install Plan based on Omaha Response.
-  InstallPlan* install_plan_;
+    // Install Plan based on Omaha Response.
+    InstallPlan *install_plan_;
 
-  DeltaArchiveManifest manifest_;
-  bool manifest_valid_;
-  uint64_t manifest_metadata_size_;
+    DeltaArchiveManifest manifest_;
+    bool manifest_valid_;
+    uint64_t manifest_metadata_size_;
 
-  // Index of the next operation to perform in the manifest.
-  size_t next_operation_num_;
+    // Index of the next operation to perform in the manifest.
+    size_t next_operation_num_;
 
-  // Flattened list of operations found in the manifest. For partition
-  // operations the InstallProcedure is nullptr.
-  std::vector<std::pair<const InstallProcedure*,
-                        const InstallOperation*>> operations_;
+    // Flattened list of operations found in the manifest. For partition
+    // operations the InstallProcedure is nullptr.
+    std::vector<std::pair<const InstallProcedure *,
+        const InstallOperation *>> operations_;
 
-  // buffer_ is a window of the data that's been downloaded. At first,
-  // it contains the beginning of the download, but after the protobuf
-  // has been downloaded and parsed, it contains a sliding window of
-  // data blobs.
-  std::vector<char> buffer_;
-  // Offset of buffer_ in the binary blobs section of the update.
-  uint64_t buffer_offset_;
+    // buffer_ is a window of the data that's been downloaded. At first,
+    // it contains the beginning of the download, but after the protobuf
+    // has been downloaded and parsed, it contains a sliding window of
+    // data blobs.
+    std::vector<char> buffer_;
+    // Offset of buffer_ in the binary blobs section of the update.
+    uint64_t buffer_offset_;
 
-  // Last |buffer_offset_| value updated as part of the progress update.
-  uint64_t last_updated_buffer_offset_;
+    // Last |buffer_offset_| value updated as part of the progress update.
+    uint64_t last_updated_buffer_offset_;
 
-  // Calculates the payload hash.
-  OmahaHashCalculator hash_calculator_;
+    // Calculates the payload hash.
+    OmahaHashCalculator hash_calculator_;
 
-  // Saves the signed hash context.
-  std::string signed_hash_context_;
+    // Saves the signed hash context.
+    std::string signed_hash_context_;
 
-  // Signatures message blob extracted directly from the payload.
-  std::vector<char> signatures_message_data_;
+    // Signatures message blob extracted directly from the payload.
+    std::vector<char> signatures_message_data_;
 
-  // The public key to be used. Provided as a member so that tests can
-  // override with test keys.
-  std::string public_key_path_;
+    // The public key to be used. Provided as a member so that tests can
+    // override with test keys.
+    std::string public_key_path_;
 
-  DISALLOW_COPY_AND_ASSIGN(PayloadProcessor);
+    DISALLOW_COPY_AND_ASSIGN(PayloadProcessor);
 };
 
 }  // namespace chromeos_update_engine

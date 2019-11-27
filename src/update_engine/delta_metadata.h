@@ -27,21 +27,22 @@ const uint64_t kDeltaVersionOffset = kDeltaMagicSize;
 const uint64_t kDeltaManifestSizeOffset = kDeltaVersionOffset + kDeltaVersionSize;
 const uint64_t kDeltaManifestOffset = kDeltaManifestSizeOffset + kDeltaManifestSizeSize;
 
-class DeltaMetadata {
- public:
-  // Attempts to parse the update metadata starting from the beginning of
-  // |payload| into |manifest|. On success, sets |metadata_size| to the total
-  // metadata bytes (including the delta magic and metadata size fields), and
-  // returns kActionCodeSuccess. Returns kActionCodeDownloadIncomplete if more
-  // data is needed to parse the complete metadata. Returns
-  // kActionCodeDownloadManifestParseError if the metadata can't be parsed.
-  static ActionExitCode ParsePayload(
-      const std::vector<char>& payload,
-      DeltaArchiveManifest* manifest,
-      uint64_t* metadata_size);
+class DeltaMetadata
+{
+public:
+    // Attempts to parse the update metadata starting from the beginning of
+    // |payload| into |manifest|. On success, sets |metadata_size| to the total
+    // metadata bytes (including the delta magic and metadata size fields), and
+    // returns kActionCodeSuccess. Returns kActionCodeDownloadIncomplete if more
+    // data is needed to parse the complete metadata. Returns
+    // kActionCodeDownloadManifestParseError if the metadata can't be parsed.
+    static ActionExitCode ParsePayload(
+        const std::vector<char> &payload,
+        DeltaArchiveManifest *manifest,
+        uint64_t *metadata_size);
 
- private:
-  DISALLOW_IMPLICIT_CONSTRUCTORS(DeltaMetadata);
+private:
+    DISALLOW_IMPLICIT_CONSTRUCTORS(DeltaMetadata);
 };
 
 };  // namespace chromeos_update_engine

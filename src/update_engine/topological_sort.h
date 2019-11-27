@@ -23,7 +23,7 @@ namespace chromeos_update_engine {
 // out[2] = C
 // out[3] = A
 // Note: results are undefined if there is a cycle in the graph.
-void TopologicalSort(const Graph& graph, std::vector<Vertex::Index>* out);
+void TopologicalSort(const Graph &graph, std::vector<Vertex::Index> *out);
 
 }  // namespace chromeos_update_engine
 

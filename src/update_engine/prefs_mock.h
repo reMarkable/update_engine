@@ -10,16 +10,17 @@
 
 namespace chromeos_update_engine {
 
-class PrefsMock : public PrefsInterface {
- public:
-  MOCK_METHOD2(GetString, bool(const std::string& key, std::string* value));
-  MOCK_METHOD2(SetString, bool(const std::string& key,
-                               const std::string& value));
-  MOCK_METHOD2(GetInt64, bool(const std::string& key, int64_t* value));
-  MOCK_METHOD2(SetInt64, bool(const std::string& key, const int64_t value));
+class PrefsMock : public PrefsInterface
+{
+public:
+    MOCK_METHOD2(GetString, bool(const std::string &key, std::string *value));
+    MOCK_METHOD2(SetString, bool(const std::string &key,
+                                 const std::string &value));
+    MOCK_METHOD2(GetInt64, bool(const std::string &key, int64_t *value));
+    MOCK_METHOD2(SetInt64, bool(const std::string &key, const int64_t value));
 
-  MOCK_METHOD1(Exists, bool(const std::string& key));
-  MOCK_METHOD1(Delete, bool(const std::string& key));
+    MOCK_METHOD1(Exists, bool(const std::string &key));
+    MOCK_METHOD1(Delete, bool(const std::string &key));
 };
 
 }  // namespace chromeos_update_engine

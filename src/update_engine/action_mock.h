@@ -14,16 +14,18 @@ namespace chromeos_update_engine {
 class ActionMock;
 
 template<>
-class ActionTraits<ActionMock> {
- public:
-  typedef NoneType OutputObjectType;
-  typedef NoneType InputObjectType;
+class ActionTraits<ActionMock>
+{
+public:
+    typedef NoneType OutputObjectType;
+    typedef NoneType InputObjectType;
 };
 
-class ActionMock : public Action<ActionMock> {
- public:
-  MOCK_METHOD0(PerformAction, void());
-  MOCK_CONST_METHOD0(Type, std::string());
+class ActionMock : public Action<ActionMock>
+{
+public:
+    MOCK_METHOD0(PerformAction, void());
+    MOCK_CONST_METHOD0(Type, std::string());
 };
 
 }  // namespace chromeos_update_engine

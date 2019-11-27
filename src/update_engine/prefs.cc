@@ -39,68 +39,83 @@ const char kPrefsCurrentUrlFailureCount[] = "current-url-failure-count";
 const char kPrefsBackoffExpiryTime[] = "backoff-expiry-time";
 const char kPrefsAlephVersion[] = "aleph-version";
 
-bool Prefs::Init(const files::FilePath& prefs_dir) {
-  prefs_dir_ = prefs_dir;
-  return true;
+bool Prefs::Init(const files::FilePath &prefs_dir)
+{
+    prefs_dir_ = prefs_dir;
+    return true;
 }
 
-bool Prefs::GetString(const string& key, string* value) {
-  files::FilePath filename;
-  TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
-  if (!files::ReadFileToString(filename, value)) {
-    LOG(INFO) << key << " not present in " << prefs_dir_.value();
-    return false;
-  }
-  return true;
+bool Prefs::GetString(const string &key, string *value)
+{
+    files::FilePath filename;
+    TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
+
+    if (!files::ReadFileToString(filename, value)) {
+        LOG(INFO) << key << " not present in " << prefs_dir_.value();
+        return false;
+    }
+
+    return true;
 }
 
-bool Prefs::SetString(const std::string& key, const std::string& value) {
-  files::FilePath filename;
-  TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
-  TEST_AND_RETURN_FALSE(files::CreateDirectory(filename.DirName()));
-  TEST_AND_RETURN_FALSE(
-      files::WriteFile(filename, value.data(), value.size()) ==
-      static_cast<int>(value.size()));
-  return true;
+bool Prefs::SetString(const std::string &key, const std::string &value)
+{
+    files::FilePath filename;
+    TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
+    TEST_AND_RETURN_FALSE(files::CreateDirectory(filename.DirName()));
+    TEST_AND_RETURN_FALSE(
+        files::WriteFile(filename, value.data(), value.size()) ==
+        static_cast<int>(value.size()));
+    return true;
 }
 
-bool Prefs::GetInt64(const string& key, int64_t* value) {
-  string str_value;
-  if (!GetString(key, &str_value))
-    return false;
-  str_value = strings::TrimWhitespace(str_value);
-  TEST_AND_RETURN_FALSE(strings::StringToInt64(str_value, value));
-  return true;
+bool Prefs::GetInt64(const string &key, int64_t *value)
+{
+    string str_value;
+
+    if (!GetString(key, &str_value)) {
+        return false;
+    }
+
+    str_value = strings::TrimWhitespace(str_value);
+    TEST_AND_RETURN_FALSE(strings::StringToInt64(str_value, value));
+    return true;
 }
 
-bool Prefs::SetInt64(const string& key, const int64_t value) {
-  return SetString(key, std::to_string(value));
+bool Prefs::SetInt64(const string &key, const int64_t value)
+{
+    return SetString(key, std::to_string(value));
 }
 
-bool Prefs::Exists(const string& key) {
-  files::FilePath filename;
-  TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
-  return files::PathExists(filename);
+bool Prefs::Exists(const string &key)
+{
+    files::FilePath filename;
+    TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
+    return files::PathExists(filename);
 }
 
-bool Prefs::Delete(const string& key) {
-  files::FilePath filename;
-  TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
-  return files::DeleteFile(filename, false);
+bool Prefs::Delete(const string &key)
+{
+    files::FilePath filename;
+    TEST_AND_RETURN_FALSE(GetFileNameForKey(key, &filename));
+    return files::DeleteFile(filename, false);
 }
 
-bool Prefs::GetFileNameForKey(const std::string& key, files::FilePath* filename) {
-  // Allows only non-empty keys containing [A-Za-z0-9_-].
-  TEST_AND_RETURN_FALSE(!key.empty());
-  for (size_t i = 0; i < key.size(); ++i) {
-    char c = key.at(i);
-    TEST_AND_RETURN_FALSE(('A' <= c && c <= 'Z') ||
-                          ('a' <= c && c <= 'z') ||
-                          ('0' <= c && c <= '9') ||
-                          c == '_' || c == '-');
-  }
-  *filename = prefs_dir_.Append(key);
-  return true;
+bool Prefs::GetFileNameForKey(const std::string &key, files::FilePath *filename)
+{
+    // Allows only non-empty keys containing [A-Za-z0-9_-].
+    TEST_AND_RETURN_FALSE(!key.empty());
+
+    for (size_t i = 0; i < key.size(); ++i) {
+        char c = key.at(i);
+        TEST_AND_RETURN_FALSE(('A' <= c && c <= 'Z') ||
+                              ('a' <= c && c <= 'z') ||
+                              ('0' <= c && c <= '9') ||
+                              c == '_' || c == '-');
+    }
+
+    *filename = prefs_dir_.Append(key);
+    return true;
 }
 
 }  // namespace chromeos_update_engine

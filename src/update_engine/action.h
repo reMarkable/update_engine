@@ -67,55 +67,62 @@
 namespace chromeos_update_engine {
 
 // It is handy to have a non-templated base class of all Actions.
-class AbstractAction {
- public:
-  AbstractAction() : processor_(NULL) {}
+class AbstractAction
+{
+public:
+    AbstractAction() : processor_(NULL) {}
 
-  // Begin performing the action. Since this code is asynchronous, when this
-  // method returns, it means only that the action has started, not necessarily
-  // completed. However, it's acceptable for this method to perform the
-  // action synchronously; Action authors should understand the implications
-  // of synchronously performing, though, because this is a single-threaded
-  // app, the entire process will be blocked while the action performs.
-  //
-  // When the action is complete, it must call
-  // ActionProcessor::ActionComplete(this); to notify the processor that it's
-  // done.
-  virtual void PerformAction() = 0;
+    // Begin performing the action. Since this code is asynchronous, when this
+    // method returns, it means only that the action has started, not necessarily
+    // completed. However, it's acceptable for this method to perform the
+    // action synchronously; Action authors should understand the implications
+    // of synchronously performing, though, because this is a single-threaded
+    // app, the entire process will be blocked while the action performs.
+    //
+    // When the action is complete, it must call
+    // ActionProcessor::ActionComplete(this); to notify the processor that it's
+    // done.
+    virtual void PerformAction() = 0;
 
-  // Called by the ActionProcessor to tell this Action which processor
-  // it belongs to.
-  void SetProcessor(ActionProcessor* processor) {
-    if (processor)
-      CHECK(!processor_);
-    else
-      CHECK(processor_);
-    processor_ = processor;
-  }
+    // Called by the ActionProcessor to tell this Action which processor
+    // it belongs to.
+    void SetProcessor(ActionProcessor *processor)
+    {
+        if (processor) {
+            CHECK(!processor_);
+        } else {
+            CHECK(processor_);
+        }
 
-  // Returns true iff the action is the current action of its ActionProcessor.
-  bool IsRunning() const {
-    if (!processor_)
-      return false;
-    return processor_->current_action() == this;
-  }
+        processor_ = processor;
+    }
 
-  // Called on asynchronous actions if canceled. Actions may implement if
-  // there's any cleanup to do. There is no need to call
-  // ActionProcessor::ActionComplete() because the processor knows this
-  // action is terminating.
-  // Only the ActionProcessor should call this.
-  virtual void TerminateProcessing() {};
+    // Returns true iff the action is the current action of its ActionProcessor.
+    bool IsRunning() const
+    {
+        if (!processor_) {
+            return false;
+        }
 
-  // These methods are useful for debugging. TODO(adlr): consider using
-  // std::type_info for this?
-  // Type() returns a string of the Action type. I.e., for DownloadAction,
-  // Type() would return "DownloadAction".
-  virtual std::string Type() const = 0;
+        return processor_->current_action() == this;
+    }
 
- protected:
-  // A weak pointer to the processor that owns this Action.
-  ActionProcessor* processor_;
+    // Called on asynchronous actions if canceled. Actions may implement if
+    // there's any cleanup to do. There is no need to call
+    // ActionProcessor::ActionComplete() because the processor knows this
+    // action is terminating.
+    // Only the ActionProcessor should call this.
+    virtual void TerminateProcessing() {};
+
+    // These methods are useful for debugging. TODO(adlr): consider using
+    // std::type_info for this?
+    // Type() returns a string of the Action type. I.e., for DownloadAction,
+    // Type() would return "DownloadAction".
+    virtual std::string Type() const = 0;
+
+protected:
+    // A weak pointer to the processor that owns this Action.
+    ActionProcessor *processor_;
 };
 
 // Forward declare a couple classes we use.
@@ -125,79 +132,89 @@ template<typename T>
 class ActionTraits;
 
 template<typename SubClass>
-class Action : public AbstractAction {
- public:
-  virtual ~Action() {}
+class Action : public AbstractAction
+{
+public:
+    virtual ~Action() {}
 
-  // Attaches an input pipe to this Action. This is optional; an Action
-  // doesn't need to have an input pipe. The input pipe must be of the type
-  // of object that this class expects.
-  // This is generally called by ActionPipe::Bond()
-  void set_in_pipe(
-      // this type is a fancy way of saying: a shared_ptr to an
-      // ActionPipe<InputObjectType>.
-      const std::shared_ptr<ActionPipe<
-          typename ActionTraits<SubClass>::InputObjectType> >&
-          in_pipe) {
-    in_pipe_ = in_pipe;
-  }
+    // Attaches an input pipe to this Action. This is optional; an Action
+    // doesn't need to have an input pipe. The input pipe must be of the type
+    // of object that this class expects.
+    // This is generally called by ActionPipe::Bond()
+    void set_in_pipe(
+        // this type is a fancy way of saying: a shared_ptr to an
+        // ActionPipe<InputObjectType>.
+        const std::shared_ptr<ActionPipe<
+        typename ActionTraits<SubClass>::InputObjectType>> &
+        in_pipe)
+    {
+        in_pipe_ = in_pipe;
+    }
 
-  // Attaches an output pipe to this Action. This is optional; an Action
-  // doesn't need to have an output pipe. The output pipe must be of the type
-  // of object that this class expects.
-  // This is generally called by ActionPipe::Bond()
-  void set_out_pipe(
-      // this type is a fancy way of saying: a shared_ptr to an
-      // ActionPipe<OutputObjectType>.
-      const std::shared_ptr<ActionPipe<
-          typename ActionTraits<SubClass>::OutputObjectType> >&
-          out_pipe) {
-    out_pipe_ = out_pipe;
-  }
+    // Attaches an output pipe to this Action. This is optional; an Action
+    // doesn't need to have an output pipe. The output pipe must be of the type
+    // of object that this class expects.
+    // This is generally called by ActionPipe::Bond()
+    void set_out_pipe(
+        // this type is a fancy way of saying: a shared_ptr to an
+        // ActionPipe<OutputObjectType>.
+        const std::shared_ptr<ActionPipe<
+        typename ActionTraits<SubClass>::OutputObjectType>> &
+        out_pipe)
+    {
+        out_pipe_ = out_pipe;
+    }
 
-  // Returns true iff there is an associated input pipe. If there's an input
-  // pipe, there's an input object, but it may have been constructed with the
-  // default ctor if the previous action didn't call SetOutputObject().
-  bool HasInputObject() const { return in_pipe_.get(); }
+    // Returns true iff there is an associated input pipe. If there's an input
+    // pipe, there's an input object, but it may have been constructed with the
+    // default ctor if the previous action didn't call SetOutputObject().
+    bool HasInputObject() const
+    {
+        return in_pipe_.get();
+    }
 
-  // returns a const reference to the object in the input pipe.
-  const typename ActionTraits<SubClass>::InputObjectType& GetInputObject()
-      const {
-    CHECK(HasInputObject());
-    return in_pipe_->contents();
-  }
+    // returns a const reference to the object in the input pipe.
+    const typename ActionTraits<SubClass>::InputObjectType &GetInputObject()
+    const
+    {
+        CHECK(HasInputObject());
+        return in_pipe_->contents();
+    }
 
-  // Returns true iff there's an output pipe.
-  bool HasOutputPipe() const {
-    return out_pipe_.get();
-  }
+    // Returns true iff there's an output pipe.
+    bool HasOutputPipe() const
+    {
+        return out_pipe_.get();
+    }
 
-  // Copies the object passed into the output pipe. It will be accessible to
-  // the next Action via that action's input pipe (which is the same as this
-  // Action's output pipe).
-  void SetOutputObject(
-      const typename ActionTraits<SubClass>::OutputObjectType& out_obj) {
-    CHECK(HasOutputPipe());
-    out_pipe_->set_contents(out_obj);
-  }
+    // Copies the object passed into the output pipe. It will be accessible to
+    // the next Action via that action's input pipe (which is the same as this
+    // Action's output pipe).
+    void SetOutputObject(
+        const typename ActionTraits<SubClass>::OutputObjectType &out_obj)
+    {
+        CHECK(HasOutputPipe());
+        out_pipe_->set_contents(out_obj);
+    }
 
-  // Returns a reference to the object sitting in the output pipe.
-  const typename ActionTraits<SubClass>::OutputObjectType& GetOutputObject() {
-    CHECK(HasOutputPipe());
-    return out_pipe_->contents();
-  }
+    // Returns a reference to the object sitting in the output pipe.
+    const typename ActionTraits<SubClass>::OutputObjectType &GetOutputObject()
+    {
+        CHECK(HasOutputPipe());
+        return out_pipe_->contents();
+    }
 
- protected:
-  // We use a shared_ptr to the pipe. shared_ptr objects destroy what they
-  // point to when the last such shared_ptr object dies. We consider the
-  // Actions on either end of a pipe to "own" the pipe. When the last Action
-  // of the two dies, the ActionPipe will die, too.
-  std::shared_ptr<
-      ActionPipe<typename ActionTraits<SubClass>::InputObjectType> >
-      in_pipe_;
-  std::shared_ptr<
-      ActionPipe<typename ActionTraits<SubClass>::OutputObjectType> >
-      out_pipe_;
+protected:
+    // We use a shared_ptr to the pipe. shared_ptr objects destroy what they
+    // point to when the last such shared_ptr object dies. We consider the
+    // Actions on either end of a pipe to "own" the pipe. When the last Action
+    // of the two dies, the ActionPipe will die, too.
+    std::shared_ptr <
+    ActionPipe<typename ActionTraits<SubClass>::InputObjectType> >
+    in_pipe_;
+    std::shared_ptr <
+    ActionPipe<typename ActionTraits<SubClass>::OutputObjectType> >
+    out_pipe_;
 };
 
 };  // namespace chromeos_update_engine

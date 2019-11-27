@@ -26,31 +26,35 @@
 
 namespace chromeos_update_engine {
 
-class CycleBreaker {
- public:
-  CycleBreaker() : skipped_ops_(0) {}
-  // out_cut_edges is replaced with the cut edges.
-  void BreakCycles(const Graph& graph, std::set<Edge>* out_cut_edges);
-  
-  size_t skipped_ops() const { return skipped_ops_; }
+class CycleBreaker
+{
+public:
+    CycleBreaker() : skipped_ops_(0) {}
+    // out_cut_edges is replaced with the cut edges.
+    void BreakCycles(const Graph &graph, std::set<Edge> *out_cut_edges);
 
- private:
-  void HandleCircuit();
-  void Unblock(Vertex::Index u);
-  bool Circuit(Vertex::Index vertex, Vertex::Index depth);
-  bool StackContainsCutEdge() const;
+    size_t skipped_ops() const
+    {
+        return skipped_ops_;
+    }
 
-  std::vector<bool> blocked_;  // "blocked" in the paper
-  Vertex::Index current_vertex_;  // "s" in the paper
-  std::vector<Vertex::Index> stack_;  // the stack variable in the paper
-  Graph subgraph_;  // "A_K" in the paper
-  Graph blocked_graph_;  // "B" in the paper
+private:
+    void HandleCircuit();
+    void Unblock(Vertex::Index u);
+    bool Circuit(Vertex::Index vertex, Vertex::Index depth);
+    bool StackContainsCutEdge() const;
 
-  std::set<Edge> cut_edges_;
-  
-  // Number of operations skipped b/c we know they don't have any
-  // incoming edges.
-  size_t skipped_ops_;
+    std::vector<bool> blocked_;  // "blocked" in the paper
+    Vertex::Index current_vertex_;  // "s" in the paper
+    std::vector<Vertex::Index> stack_;  // the stack variable in the paper
+    Graph subgraph_;  // "A_K" in the paper
+    Graph blocked_graph_;  // "B" in the paper
+
+    std::set<Edge> cut_edges_;
+
+    // Number of operations skipped b/c we know they don't have any
+    // incoming edges.
+    size_t skipped_ops_;
 };
 
 }  // namespace chromeos_update_engine

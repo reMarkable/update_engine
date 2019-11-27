@@ -17,8 +17,8 @@ using std::vector;
 
 namespace chromeos_update_engine {
 
-DownloadAction::DownloadAction(PrefsInterface* prefs,
-                               HttpFetcher* http_fetcher)
+DownloadAction::DownloadAction(PrefsInterface *prefs,
+                               HttpFetcher *http_fetcher)
     : prefs_(prefs),
       http_fetcher_(http_fetcher),
       writer_(NULL),
@@ -28,98 +28,118 @@ DownloadAction::DownloadAction(PrefsInterface* prefs,
 
 DownloadAction::~DownloadAction() {}
 
-void DownloadAction::PerformAction() {
-  http_fetcher_->set_delegate(this);
+void DownloadAction::PerformAction()
+{
+    http_fetcher_->set_delegate(this);
 
-  // Get the InstallPlan and read it
-  CHECK(HasInputObject());
-  install_plan_ = GetInputObject();
-  bytes_downloaded_ = 0;
+    // Get the InstallPlan and read it
+    CHECK(HasInputObject());
+    install_plan_ = GetInputObject();
+    bytes_downloaded_ = 0;
 
-  install_plan_.Dump();
+    install_plan_.Dump();
 
-  if (writer_) {
-    LOG(INFO) << "Using writer for test.";
-  } else {
-    payload_processor_.reset(new PayloadProcessor(prefs_, &install_plan_));
-    writer_ = payload_processor_.get();
-  }
-  int rc = writer_->Open();
-  if (rc < 0) {
-    // report error to processor
-    processor_->ActionComplete(this, kActionCodeInstallDeviceOpenError);
-    return;
-  }
-  if (delegate_) {
-    delegate_->SetDownloadStatus(true);  // Set to active.
-  }
-  http_fetcher_->BeginTransfer(install_plan_.download_url);
+    if (writer_) {
+        LOG(INFO) << "Using writer for test.";
+    } else {
+        payload_processor_.reset(new PayloadProcessor(prefs_, &install_plan_));
+        writer_ = payload_processor_.get();
+    }
+
+    int rc = writer_->Open();
+
+    if (rc < 0) {
+        // report error to processor
+        processor_->ActionComplete(this, kActionCodeInstallDeviceOpenError);
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->SetDownloadStatus(true);  // Set to active.
+    }
+
+    http_fetcher_->BeginTransfer(install_plan_.download_url);
 }
 
-void DownloadAction::TerminateProcessing() {
-  if (writer_) {
-    LOG_IF(WARNING, writer_->Close() != 0) << "Error closing the writer.";
-    writer_ = NULL;
-  }
-  if (delegate_) {
-    delegate_->SetDownloadStatus(false);  // Set to inactive.
-  }
-  // Terminates the transfer. The action is terminated, if necessary, when the
-  // TransferTerminated callback is received.
-  http_fetcher_->TerminateTransfer();
+void DownloadAction::TerminateProcessing()
+{
+    if (writer_) {
+        LOG_IF(WARNING, writer_->Close() != 0) << "Error closing the writer.";
+        writer_ = NULL;
+    }
+
+    if (delegate_) {
+        delegate_->SetDownloadStatus(false);  // Set to inactive.
+    }
+
+    // Terminates the transfer. The action is terminated, if necessary, when the
+    // TransferTerminated callback is received.
+    http_fetcher_->TerminateTransfer();
 }
 
-void DownloadAction::SeekToOffset(off_t offset) {
-  bytes_downloaded_ = offset;
+void DownloadAction::SeekToOffset(off_t offset)
+{
+    bytes_downloaded_ = offset;
 }
 
 void DownloadAction::ReceivedBytes(HttpFetcher *fetcher,
-                                   const char* bytes,
-                                   int length) {
-  bytes_downloaded_ += length;
-  if (delegate_)
-    delegate_->BytesReceived(length,
-                             bytes_downloaded_,
-                             install_plan_.payload_size);
-  if (writer_ && !writer_->Write(bytes, length, &code_)) {
-    LOG(ERROR) << "Error " << code_ << " while processing the received payload"
-               << " -- Terminating processing";
-    // Don't tell the action processor that the action is complete until we get
-    // the TransferTerminated callback. Otherwise, this and the HTTP fetcher
-    // objects may get destroyed before all callbacks are complete.
-    TerminateProcessing();
-    return;
-  }
-}
+                                   const char *bytes,
+                                   int length)
+{
+    bytes_downloaded_ += length;
 
-void DownloadAction::TransferComplete(HttpFetcher *fetcher, bool successful) {
-  if (writer_) {
-    LOG_IF(WARNING, writer_->Close() != 0) << "Error closing the writer.";
-    writer_ = NULL;
-  }
-  if (delegate_) {
-    delegate_->SetDownloadStatus(false);  // Set to inactive.
-  }
-  ActionExitCode code =
-      successful ? kActionCodeSuccess : kActionCodeDownloadTransferError;
-  if (code == kActionCodeSuccess && payload_processor_.get()) {
-    code = payload_processor_->VerifyPayload();
-    if (code != kActionCodeSuccess) {
-      LOG(ERROR) << "Download of " << install_plan_.download_url
-                 << " failed due to payload verification error.";
+    if (delegate_)
+        delegate_->BytesReceived(length,
+                                 bytes_downloaded_,
+                                 install_plan_.payload_size);
+
+    if (writer_ && !writer_->Write(bytes, length, &code_)) {
+        LOG(ERROR) << "Error " << code_ << " while processing the received payload"
+                   << " -- Terminating processing";
+        // Don't tell the action processor that the action is complete until we get
+        // the TransferTerminated callback. Otherwise, this and the HTTP fetcher
+        // objects may get destroyed before all callbacks are complete.
+        TerminateProcessing();
+        return;
     }
-  }
-
-  // Write the plan to the output pipe if we're successful.
-  if (code == kActionCodeSuccess && HasOutputPipe())
-    SetOutputObject(install_plan_);
-  processor_->ActionComplete(this, code);
 }
 
-void DownloadAction::TransferTerminated(HttpFetcher *fetcher) {
-  if (code_ != kActionCodeSuccess) {
-    processor_->ActionComplete(this, code_);
-  }
+void DownloadAction::TransferComplete(HttpFetcher *fetcher, bool successful)
+{
+    if (writer_) {
+        LOG_IF(WARNING, writer_->Close() != 0) << "Error closing the writer.";
+        writer_ = NULL;
+    }
+
+    if (delegate_) {
+        delegate_->SetDownloadStatus(false);  // Set to inactive.
+    }
+
+    ActionExitCode code =
+        successful ? kActionCodeSuccess : kActionCodeDownloadTransferError;
+
+    if (code == kActionCodeSuccess && payload_processor_.get()) {
+        code = payload_processor_->VerifyPayload();
+
+        if (code != kActionCodeSuccess) {
+            LOG(ERROR) << "Download of " << install_plan_.download_url
+                       << " failed due to payload verification error.";
+        }
+    }
+
+    // Write the plan to the output pipe if we're successful.
+    if (code == kActionCodeSuccess && HasOutputPipe()) {
+        SetOutputObject(install_plan_);
+    }
+
+    processor_->ActionComplete(this, code);
+}
+
+void DownloadAction::TransferTerminated(HttpFetcher *fetcher)
+{
+    if (code_ != kActionCodeSuccess) {
+        processor_->ActionComplete(this, code_);
+    }
 }
 
 };  // namespace {}

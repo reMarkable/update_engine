@@ -7,10 +7,10 @@
 
 namespace chromeos_update_engine {
 
-static const char* const kUpdateEngineServiceName = "no.remarkable.update1";
-static const char* const kUpdateEngineServicePath =
+static const char *const kUpdateEngineServiceName = "no.remarkable.update1";
+static const char *const kUpdateEngineServicePath =
     "/no/remarkable/update1";
-static const char* const kUpdateEngineServiceInterface =
+static const char *const kUpdateEngineServiceInterface =
     "no.remarkable.update1.Manager";
 }  // namespace chromeos_update_engine
 

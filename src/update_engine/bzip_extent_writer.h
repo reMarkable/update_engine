@@ -16,21 +16,23 @@
 
 namespace chromeos_update_engine {
 
-class BzipExtentWriter : public ExtentWriter {
- public:
-  BzipExtentWriter(ExtentWriter* next) : next_(next) {
-    memset(&stream_, 0, sizeof(stream_));
-  }
-  ~BzipExtentWriter() {}
+class BzipExtentWriter : public ExtentWriter
+{
+public:
+    BzipExtentWriter(ExtentWriter *next) : next_(next)
+    {
+        memset(&stream_, 0, sizeof(stream_));
+    }
+    ~BzipExtentWriter() {}
 
-  bool Init(int fd, const std::vector<Extent>& extents, uint32_t block_size);
-  bool Write(const void* bytes, size_t count);
-  bool EndImpl();
+    bool Init(int fd, const std::vector<Extent> &extents, uint32_t block_size);
+    bool Write(const void *bytes, size_t count);
+    bool EndImpl();
 
- private:
-  ExtentWriter* const next_;  // The underlying ExtentWriter.
-  bz_stream stream_;  // the libbz2 stream
-  std::vector<char> input_buffer_;
+private:
+    ExtentWriter *const next_;  // The underlying ExtentWriter.
+    bz_stream stream_;  // the libbz2 stream
+    std::vector<char> input_buffer_;
 };
 
 }  // namespace chromeos_update_engine

@@ -15,19 +15,19 @@ namespace strings {
 // with |delim|, then an empty string is inserted.
 //
 // Every substring is trimmed of any leading or trailing white space.
-std::vector<std::string> SplitAndTrim(const std::string& str, char delim);
-std::vector<std::string> SplitAndTrim(const std::string& str,
-                                      const std::string& delim);
+std::vector<std::string> SplitAndTrim(const std::string &str, char delim);
+std::vector<std::string> SplitAndTrim(const std::string &str,
+                                      const std::string &delim);
 
 // The same as SplitAndTrim, but don't trim white space.
-std::vector<std::string> SplitDontTrim(const std::string& str, char delim);
+std::vector<std::string> SplitDontTrim(const std::string &str, char delim);
 
 // Splits the string along ASCII whitespace.
 // Each contiguous block of non-whitespace characters is added to result.
-std::vector<std::string> SplitWords(const std::string& str);
+std::vector<std::string> SplitWords(const std::string &str);
 
 // Trims any ASCII whitespace from either end of the input string.
-std::string TrimWhitespace(const std::string& input);
+std::string TrimWhitespace(const std::string &input);
 
 }  // namespace strings
 

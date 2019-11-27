@@ -17,50 +17,55 @@ namespace chromeos_update_engine {
 
 // A real implementation of the SystemStateInterface which is
 // used by the actual product code.
-class RealSystemState : public SystemState {
+class RealSystemState : public SystemState
+{
 public:
-  // Constructors and destructors.
-  RealSystemState();
-  virtual ~RealSystemState() {}
+    // Constructors and destructors.
+    RealSystemState();
+    virtual ~RealSystemState() {}
 
-  virtual inline PrefsInterface* prefs() {
-    return &prefs_;
-  }
+    virtual inline PrefsInterface *prefs()
+    {
+        return &prefs_;
+    }
 
-  virtual inline PayloadStateInterface* payload_state() {
-    return &payload_state_;
-  }
+    virtual inline PayloadStateInterface *payload_state()
+    {
+        return &payload_state_;
+    }
 
-  virtual inline UpdateAttempter* update_attempter() {
-    return update_attempter_.get();
-  }
+    virtual inline UpdateAttempter *update_attempter()
+    {
+        return update_attempter_.get();
+    }
 
-  // Returns a pointer to the object that stores the parameters that are
-  // common to all Omaha requests.
-  virtual inline OmahaRequestParams* request_params() {
-    return &request_params_;
-  }
+    // Returns a pointer to the object that stores the parameters that are
+    // common to all Omaha requests.
+    virtual inline OmahaRequestParams *request_params()
+    {
+        return &request_params_;
+    }
 
-  // Initializes this concrete object. Other methods should be invoked only
-  // if the object has been initialized successfully.
-  bool Initialize();
+    // Initializes this concrete object. Other methods should be invoked only
+    // if the object has been initialized successfully.
+    bool Initialize();
 
 private:
-  // Interface for persisted store.
-  Prefs prefs_;
+    // Interface for persisted store.
+    Prefs prefs_;
 
-  // All state pertaining to payload state such as
-  // response, URL, backoff states.
-  PayloadState payload_state_;
+    // All state pertaining to payload state such as
+    // response, URL, backoff states.
+    PayloadState payload_state_;
 
-  // The dbus object used to initialize the update attempter.
-  ConcreteDbusGlib dbus_;
+    // The dbus object used to initialize the update attempter.
+    ConcreteDbusGlib dbus_;
 
-  // Pointer to the update attempter object.
-  std::unique_ptr<UpdateAttempter> update_attempter_;
+    // Pointer to the update attempter object.
+    std::unique_ptr<UpdateAttempter> update_attempter_;
 
-  // Common parameters for all Omaha requests.
-  OmahaRequestParams request_params_;
+    // Common parameters for all Omaha requests.
+    OmahaRequestParams request_params_;
 };
 
 }  // namespace chromeos_update_engine

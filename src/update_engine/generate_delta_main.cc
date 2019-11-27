@@ -75,226 +75,256 @@ namespace chromeos_update_engine {
 
 namespace {
 
-bool IsDir(const char* path) {
-  struct stat stbuf;
-  TEST_AND_RETURN_FALSE_ERRNO(lstat(path, &stbuf) == 0);
-  return S_ISDIR(stbuf.st_mode);
+bool IsDir(const char *path)
+{
+    struct stat stbuf;
+    TEST_AND_RETURN_FALSE_ERRNO(lstat(path, &stbuf) == 0);
+    return S_ISDIR(stbuf.st_mode);
 }
 
-void ParseSignatureSizes(vector<int>* sizes) {
-  LOG_IF(FATAL, FLAGS_signature_size.empty())
-      << "Must pass --signature_size to calculate hash for signing.";
-  vector<string> strsizes = strings::SplitAndTrim(FLAGS_signature_size, ':');
-  for (const string& str : strsizes) {
-    int size = 0;
-    bool parsing_successful = strings::StringToInt(str, &size);
-    LOG_IF(FATAL, !parsing_successful)
-        << "Invalid signature size: " << str;
-    sizes->push_back(size);
-  }
-}
+void ParseSignatureSizes(vector<int> *sizes)
+{
+    LOG_IF(FATAL, FLAGS_signature_size.empty())
+            << "Must pass --signature_size to calculate hash for signing.";
+    vector<string> strsizes = strings::SplitAndTrim(FLAGS_signature_size, ':');
 
-
-void CalculatePayloadHashForSigning() {
-  LOG(INFO) << "Calculating payload hash for signing.";
-  LOG_IF(FATAL, FLAGS_in_file.empty())
-      << "Must pass --in_file to calculate hash for signing.";
-  LOG_IF(FATAL, FLAGS_out_hash_file.empty())
-      << "Must pass --out_hash_file to calculate hash for signing.";
-  vector<int> sizes;
-  ParseSignatureSizes(&sizes);
-
-  vector<char> hash;
-  bool result = PayloadSigner::HashPayloadForSigning(FLAGS_in_file, sizes,
-                                                     &hash);
-  CHECK(result);
-
-  result = utils::WriteFile(FLAGS_out_hash_file.c_str(), hash.data(),
-                            hash.size());
-  CHECK(result);
-  LOG(INFO) << "Done calculating payload hash for signing.";
-}
-
-
-void CalculateMetadataHashForSigning() {
-  LOG(INFO) << "Calculating metadata hash for signing.";
-  LOG_IF(FATAL, FLAGS_in_file.empty())
-      << "Must pass --in_file to calculate metadata hash for signing.";
-  LOG_IF(FATAL, FLAGS_out_metadata_hash_file.empty())
-      << "Must pass --out_metadata_hash_file to calculate metadata hash.";
-  vector<int> sizes;
-  ParseSignatureSizes(&sizes);
-
-  vector<char> hash;
-  bool result = PayloadSigner::HashMetadataForSigning(FLAGS_in_file, &hash);
-  CHECK(result);
-
-  result = utils::WriteFile(FLAGS_out_metadata_hash_file.c_str(), hash.data(),
-                            hash.size());
-  CHECK(result);
-
-  LOG(INFO) << "Done calculating metadata hash for signing.";
-}
-
-void SignPayload() {
-  LOG(INFO) << "Signing payload.";
-  LOG_IF(FATAL, FLAGS_in_file.empty())
-      << "Must pass --in_file to sign payload.";
-  LOG_IF(FATAL, FLAGS_out_file.empty())
-      << "Must pass --out_file to sign payload.";
-  LOG_IF(FATAL, FLAGS_signature_file.empty())
-      << "Must pass --signature_file to sign payload.";
-  vector<vector<char> > signatures;
-  vector<string> signature_files = strings::SplitAndTrim(FLAGS_signature_file, ':');
-  for (vector<string>::iterator it = signature_files.begin(),
-           e = signature_files.end(); it != e; ++it) {
-    vector<char> signature;
-    CHECK(utils::ReadFile(*it, &signature));
-    signatures.push_back(signature);
-  }
-  uint64_t final_metadata_size;
-  CHECK(PayloadSigner::AddSignatureToPayload(
-      FLAGS_in_file, signatures, FLAGS_out_file, &final_metadata_size));
-  LOG(INFO) << "Done signing payload. Final metadata size = "
-            << final_metadata_size;
-}
-
-void VerifySignedPayload() {
-  LOG(INFO) << "Verifying signed payload.";
-  LOG_IF(FATAL, FLAGS_in_file.empty())
-      << "Must pass --in_file to verify signed payload.";
-  LOG_IF(FATAL, FLAGS_public_key.empty())
-      << "Must pass --public_key to verify signed payload.";
-  CHECK(PayloadSigner::VerifySignedPayload(FLAGS_in_file, FLAGS_public_key,
-                                           FLAGS_public_key_version));
-  LOG(INFO) << "Done verifying signed payload.";
-}
-
-void ApplyDelta() {
-  LOG(INFO) << "Applying delta.";
-  LOG_IF(FATAL, FLAGS_old_image.empty())
-      << "Must pass --old_image to apply delta.";
-  Prefs prefs;
-  InstallPlan install_plan;
-  LOG(INFO) << "Setting up preferences under: " << FLAGS_prefs_dir;
-  LOG_IF(ERROR, !prefs.Init(files::FilePath(FLAGS_prefs_dir)))
-      << "Failed to initialize preferences.";
-  // Get original checksums
-  LOG(INFO) << "Calculating original checksums";
-  InstallInfo old_info;
-  CHECK(DeltaDiffGenerator::InitializeInfo(FLAGS_old_image,
-                                           &old_info));
-  install_plan.old_partition_hash.assign(old_info.hash().begin(),
-                                         old_info.hash().end());
-  install_plan.partition_path = FLAGS_old_image;
-  install_plan.kernel_path = FLAGS_old_kernel;
-  PayloadProcessor performer(&prefs, &install_plan);
-  CHECK_EQ(performer.Open(), 0);
-  vector<char> buf(1024 * 1024);
-  int fd = open(FLAGS_in_file.c_str(), O_RDONLY, 0);
-  CHECK_GE(fd, 0);
-  files::ScopedFD fd_closer(fd);
-  for (off_t offset = 0;; offset += buf.size()) {
-    ssize_t bytes_read;
-    CHECK(utils::PReadAll(fd, &buf[0], buf.size(), offset, &bytes_read));
-    if (bytes_read == 0)
-      break;
-    CHECK(performer.Write(&buf[0], bytes_read));
-  }
-  CHECK_EQ(performer.Close(), 0);
-  PayloadProcessor::ResetUpdateProgress(&prefs, false);
-  LOG(INFO) << "Done applying delta.";
-}
-
-int Main(int argc, char** argv) {
-  // Disable glog's default behavior of logging to files.
-  FLAGS_logtostderr = true;
-  GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
-  google::InitGoogleLogging(argv[0]);
-
-  Terminator::Init();
-  Subprocess::Init();
-
-  if (!FLAGS_signature_size.empty()) {
-    bool work_done = false;
-    if (!FLAGS_out_hash_file.empty()) {
-      CalculatePayloadHashForSigning();
-      work_done = true;
+    for (const string &str : strsizes) {
+        int size = 0;
+        bool parsing_successful = strings::StringToInt(str, &size);
+        LOG_IF(FATAL, !parsing_successful)
+                << "Invalid signature size: " << str;
+        sizes->push_back(size);
     }
-    if (!FLAGS_out_metadata_hash_file.empty()) {
-      CalculateMetadataHashForSigning();
-      work_done = true;
-    }
-    if (!work_done) {
-      LOG(FATAL) << "Neither payload hash file nor metadata hash file supplied";
-    }
-    return 0;
-  }
-  if (!FLAGS_signature_file.empty()) {
-    SignPayload();
-    return 0;
-  }
-  if (!FLAGS_public_key.empty()) {
-    VerifySignedPayload();
-    return 0;
-  }
-  if (!FLAGS_in_file.empty()) {
-    ApplyDelta();
-    return 0;
-  }
-  CHECK(!FLAGS_new_image.empty());
-  CHECK(!FLAGS_out_file.empty());
-  if (FLAGS_old_image.empty()) {
-    LOG(INFO) << "Generating full update";
-  } else {
-    LOG(INFO) << "Generating delta update";
-    CHECK(!FLAGS_old_dir.empty());
-    CHECK(!FLAGS_new_dir.empty());
-    if ((!IsDir(FLAGS_old_dir.c_str())) || (!IsDir(FLAGS_new_dir.c_str()))) {
-      LOG(FATAL) << "old_dir or new_dir not directory";
-    }
-  }
-  uint64_t metadata_size;
-  if (!DeltaDiffGenerator::GenerateDeltaUpdateFile(FLAGS_old_dir,
-                                                   FLAGS_old_image,
-                                                   FLAGS_new_dir,
-                                                   FLAGS_new_image,
-                                                   FLAGS_old_kernel,
-                                                   FLAGS_new_kernel,
-                                                   FLAGS_out_file,
-                                                   FLAGS_private_key,
-                                                   &metadata_size)) {
-    return 1;
-  }
+}
 
-  {
-      off_t size = 0;
-      utils::GetDeviceSize(FLAGS_out_file, &size);
-      OmahaHashCalculator hasher;
-      hasher.UpdateFile(FLAGS_out_file, size);
-      hasher.Finalize();
-    /*
-     {
-      "IsDeltaPayload":"false",
-      "sha256":"1S8JlHs3qgk3xBGmRg5gmR+uDXJyhhzbOOG+JJ4XlAY=",
-      "DisablePayloadBackoff":"true"
-     }
-     */
-      LOG(INFO) << FLAGS_out_file << ": size=" << size;
-      LOG(INFO) << "\n"
-          "{\n"
-          "  \"IsDeltaPayload\": \"false\",\n"
-          "  \"sha256\": \"" << hasher.hash() << "\",\n"
-          "  \"DisablePayloadBackoff\": \"true\"\n"
-          "}\n";
-  }
-  return 0;
+
+void CalculatePayloadHashForSigning()
+{
+    LOG(INFO) << "Calculating payload hash for signing.";
+    LOG_IF(FATAL, FLAGS_in_file.empty())
+            << "Must pass --in_file to calculate hash for signing.";
+    LOG_IF(FATAL, FLAGS_out_hash_file.empty())
+            << "Must pass --out_hash_file to calculate hash for signing.";
+    vector<int> sizes;
+    ParseSignatureSizes(&sizes);
+
+    vector<char> hash;
+    bool result = PayloadSigner::HashPayloadForSigning(FLAGS_in_file, sizes,
+                  &hash);
+    CHECK(result);
+
+    result = utils::WriteFile(FLAGS_out_hash_file.c_str(), hash.data(),
+                              hash.size());
+    CHECK(result);
+    LOG(INFO) << "Done calculating payload hash for signing.";
+}
+
+
+void CalculateMetadataHashForSigning()
+{
+    LOG(INFO) << "Calculating metadata hash for signing.";
+    LOG_IF(FATAL, FLAGS_in_file.empty())
+            << "Must pass --in_file to calculate metadata hash for signing.";
+    LOG_IF(FATAL, FLAGS_out_metadata_hash_file.empty())
+            << "Must pass --out_metadata_hash_file to calculate metadata hash.";
+    vector<int> sizes;
+    ParseSignatureSizes(&sizes);
+
+    vector<char> hash;
+    bool result = PayloadSigner::HashMetadataForSigning(FLAGS_in_file, &hash);
+    CHECK(result);
+
+    result = utils::WriteFile(FLAGS_out_metadata_hash_file.c_str(), hash.data(),
+                              hash.size());
+    CHECK(result);
+
+    LOG(INFO) << "Done calculating metadata hash for signing.";
+}
+
+void SignPayload()
+{
+    LOG(INFO) << "Signing payload.";
+    LOG_IF(FATAL, FLAGS_in_file.empty())
+            << "Must pass --in_file to sign payload.";
+    LOG_IF(FATAL, FLAGS_out_file.empty())
+            << "Must pass --out_file to sign payload.";
+    LOG_IF(FATAL, FLAGS_signature_file.empty())
+            << "Must pass --signature_file to sign payload.";
+    vector<vector<char>> signatures;
+    vector<string> signature_files = strings::SplitAndTrim(FLAGS_signature_file, ':');
+
+    for (vector<string>::iterator it = signature_files.begin(),
+            e = signature_files.end(); it != e; ++it) {
+        vector<char> signature;
+        CHECK(utils::ReadFile(*it, &signature));
+        signatures.push_back(signature);
+    }
+
+    uint64_t final_metadata_size;
+    CHECK(PayloadSigner::AddSignatureToPayload(
+              FLAGS_in_file, signatures, FLAGS_out_file, &final_metadata_size));
+    LOG(INFO) << "Done signing payload. Final metadata size = "
+              << final_metadata_size;
+}
+
+void VerifySignedPayload()
+{
+    LOG(INFO) << "Verifying signed payload.";
+    LOG_IF(FATAL, FLAGS_in_file.empty())
+            << "Must pass --in_file to verify signed payload.";
+    LOG_IF(FATAL, FLAGS_public_key.empty())
+            << "Must pass --public_key to verify signed payload.";
+    CHECK(PayloadSigner::VerifySignedPayload(FLAGS_in_file, FLAGS_public_key,
+            FLAGS_public_key_version));
+    LOG(INFO) << "Done verifying signed payload.";
+}
+
+void ApplyDelta()
+{
+    LOG(INFO) << "Applying delta.";
+    LOG_IF(FATAL, FLAGS_old_image.empty())
+            << "Must pass --old_image to apply delta.";
+    Prefs prefs;
+    InstallPlan install_plan;
+    LOG(INFO) << "Setting up preferences under: " << FLAGS_prefs_dir;
+    LOG_IF(ERROR, !prefs.Init(files::FilePath(FLAGS_prefs_dir)))
+            << "Failed to initialize preferences.";
+    // Get original checksums
+    LOG(INFO) << "Calculating original checksums";
+    InstallInfo old_info;
+    CHECK(DeltaDiffGenerator::InitializeInfo(FLAGS_old_image,
+            &old_info));
+    install_plan.old_partition_hash.assign(old_info.hash().begin(),
+                                           old_info.hash().end());
+    install_plan.partition_path = FLAGS_old_image;
+    install_plan.kernel_path = FLAGS_old_kernel;
+    PayloadProcessor performer(&prefs, &install_plan);
+    CHECK_EQ(performer.Open(), 0);
+    vector<char> buf(1024 * 1024);
+    int fd = open(FLAGS_in_file.c_str(), O_RDONLY, 0);
+    CHECK_GE(fd, 0);
+    files::ScopedFD fd_closer(fd);
+
+    for (off_t offset = 0;; offset += buf.size()) {
+        ssize_t bytes_read;
+        CHECK(utils::PReadAll(fd, &buf[0], buf.size(), offset, &bytes_read));
+
+        if (bytes_read == 0) {
+            break;
+        }
+
+        CHECK(performer.Write(&buf[0], bytes_read));
+    }
+
+    CHECK_EQ(performer.Close(), 0);
+    PayloadProcessor::ResetUpdateProgress(&prefs, false);
+    LOG(INFO) << "Done applying delta.";
+}
+
+int Main(int argc, char **argv)
+{
+    // Disable glog's default behavior of logging to files.
+    FLAGS_logtostderr = true;
+    GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
+    google::InitGoogleLogging(argv[0]);
+
+    Terminator::Init();
+    Subprocess::Init();
+
+    if (!FLAGS_signature_size.empty()) {
+        bool work_done = false;
+
+        if (!FLAGS_out_hash_file.empty()) {
+            CalculatePayloadHashForSigning();
+            work_done = true;
+        }
+
+        if (!FLAGS_out_metadata_hash_file.empty()) {
+            CalculateMetadataHashForSigning();
+            work_done = true;
+        }
+
+        if (!work_done) {
+            LOG(FATAL) << "Neither payload hash file nor metadata hash file supplied";
+        }
+
+        return 0;
+    }
+
+    if (!FLAGS_signature_file.empty()) {
+        SignPayload();
+        return 0;
+    }
+
+    if (!FLAGS_public_key.empty()) {
+        VerifySignedPayload();
+        return 0;
+    }
+
+    if (!FLAGS_in_file.empty()) {
+        ApplyDelta();
+        return 0;
+    }
+
+    CHECK(!FLAGS_new_image.empty());
+    CHECK(!FLAGS_out_file.empty());
+
+    if (FLAGS_old_image.empty()) {
+        LOG(INFO) << "Generating full update";
+    } else {
+        LOG(INFO) << "Generating delta update";
+        CHECK(!FLAGS_old_dir.empty());
+        CHECK(!FLAGS_new_dir.empty());
+
+        if ((!IsDir(FLAGS_old_dir.c_str())) || (!IsDir(FLAGS_new_dir.c_str()))) {
+            LOG(FATAL) << "old_dir or new_dir not directory";
+        }
+    }
+
+    uint64_t metadata_size;
+
+    if (!DeltaDiffGenerator::GenerateDeltaUpdateFile(FLAGS_old_dir,
+            FLAGS_old_image,
+            FLAGS_new_dir,
+            FLAGS_new_image,
+            FLAGS_old_kernel,
+            FLAGS_new_kernel,
+            FLAGS_out_file,
+            FLAGS_private_key,
+            &metadata_size)) {
+        return 1;
+    }
+
+    {
+        off_t size = 0;
+        utils::GetDeviceSize(FLAGS_out_file, &size);
+        OmahaHashCalculator hasher;
+        hasher.UpdateFile(FLAGS_out_file, size);
+        hasher.Finalize();
+        /*
+         {
+          "IsDeltaPayload":"false",
+          "sha256":"1S8JlHs3qgk3xBGmRg5gmR+uDXJyhhzbOOG+JJ4XlAY=",
+          "DisablePayloadBackoff":"true"
+         }
+         */
+        LOG(INFO) << FLAGS_out_file << ": size=" << size;
+        LOG(INFO) << "\n"
+                  "{\n"
+                  "  \"IsDeltaPayload\": \"false\",\n"
+                  "  \"sha256\": \"" << hasher.hash() << "\",\n"
+                  "  \"DisablePayloadBackoff\": \"true\"\n"
+                  "}\n";
+    }
+
+    return 0;
 }
 
 }  // namespace {}
 
 }  // namespace chromeos_update_engine
 
-int main(int argc, char** argv) {
-  return chromeos_update_engine::Main(argc, argv);
+int main(int argc, char **argv)
+{
+    return chromeos_update_engine::Main(argc, argv);
 }

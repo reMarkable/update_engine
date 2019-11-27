@@ -112,138 +112,149 @@ namespace files {
 
 // An abstraction to isolate users from the differences between native
 // pathnames on different platforms.
-class FilePath {
- public:
-  typedef std::string StringType;
-  typedef StringType::value_type CharType;
+class FilePath
+{
+public:
+    typedef std::string StringType;
+    typedef StringType::value_type CharType;
 
-  // Null-terminated array of separators used to separate components in
-  // hierarchical paths.  Each character in this array is a valid separator,
-  // but kSeparators[0] is treated as the canonical separator and will be used
-  // when composing pathnames.
-  static const CharType kSeparators[];
+    // Null-terminated array of separators used to separate components in
+    // hierarchical paths.  Each character in this array is a valid separator,
+    // but kSeparators[0] is treated as the canonical separator and will be used
+    // when composing pathnames.
+    static const CharType kSeparators[];
 
-  // arraysize(kSeparators).
-  static const size_t kSeparatorsLength;
+    // arraysize(kSeparators).
+    static const size_t kSeparatorsLength;
 
-  // A special path component meaning "this directory."
-  static const CharType kCurrentDirectory[];
+    // A special path component meaning "this directory."
+    static const CharType kCurrentDirectory[];
 
-  // A special path component meaning "the parent directory."
-  static const CharType kParentDirectory[];
+    // A special path component meaning "the parent directory."
+    static const CharType kParentDirectory[];
 
-  FilePath();
-  FilePath(const FilePath& that);
-  explicit FilePath(StringType path);
-  ~FilePath();
-  FilePath& operator=(const FilePath& that);
+    FilePath();
+    FilePath(const FilePath &that);
+    explicit FilePath(StringType path);
+    ~FilePath();
+    FilePath &operator=(const FilePath &that);
 
-  bool operator==(const FilePath& that) const;
+    bool operator==(const FilePath &that) const;
 
-  bool operator!=(const FilePath& that) const;
+    bool operator!=(const FilePath &that) const;
 
-  // Required for some STL containers and operations
-  bool operator<(const FilePath& that) const {
-    return path_ < that.path_;
-  }
+    // Required for some STL containers and operations
+    bool operator<(const FilePath &that) const
+    {
+        return path_ < that.path_;
+    }
 
-  const StringType& value() const { return path_; }
+    const StringType &value() const
+    {
+        return path_;
+    }
 
-  bool empty() const { return path_.empty(); }
+    bool empty() const
+    {
+        return path_.empty();
+    }
 
-  void clear() { path_.clear(); }
+    void clear()
+    {
+        path_.clear();
+    }
 
-  // Returns true if |character| is in kSeparators.
-  static bool IsSeparator(CharType character);
+    // Returns true if |character| is in kSeparators.
+    static bool IsSeparator(CharType character);
 
-  // Returns a vector of all of the components of the provided path. It is
-  // equivalent to calling DirName().value() on the path's root component,
-  // and BaseName().value() on each child component.
-  //
-  // To make sure this is lossless so we can differentiate absolute and
-  // relative paths, the root slash will be included even though no other
-  // slashes will be. The precise behavior is:
-  //
-  // Posix:  "/foo/bar"  ->  [ "/", "foo", "bar" ]
-  // Windows:  "C:\foo\bar"  ->  [ "C:", "\\", "foo", "bar" ]
-  void GetComponents(std::vector<FilePath::StringType>* components) const;
+    // Returns a vector of all of the components of the provided path. It is
+    // equivalent to calling DirName().value() on the path's root component,
+    // and BaseName().value() on each child component.
+    //
+    // To make sure this is lossless so we can differentiate absolute and
+    // relative paths, the root slash will be included even though no other
+    // slashes will be. The precise behavior is:
+    //
+    // Posix:  "/foo/bar"  ->  [ "/", "foo", "bar" ]
+    // Windows:  "C:\foo\bar"  ->  [ "C:", "\\", "foo", "bar" ]
+    void GetComponents(std::vector<FilePath::StringType> *components) const;
 
-  // Returns true if this FilePath is a strict parent of the |child|. Absolute
-  // and relative paths are accepted i.e. is /foo parent to /foo/bar and
-  // is foo parent to foo/bar. Does not convert paths to absolute, follow
-  // symlinks or directory navigation (e.g. ".."). A path is *NOT* its own
-  // parent.
-  bool IsParent(const FilePath& child) const;
+    // Returns true if this FilePath is a strict parent of the |child|. Absolute
+    // and relative paths are accepted i.e. is /foo parent to /foo/bar and
+    // is foo parent to foo/bar. Does not convert paths to absolute, follow
+    // symlinks or directory navigation (e.g. ".."). A path is *NOT* its own
+    // parent.
+    bool IsParent(const FilePath &child) const;
 
-  // If IsParent(child) holds, appends to path (if non-NULL) the
-  // relative path to child and returns true.  For example, if parent
-  // holds "/Users/johndoe/Library/Application Support", child holds
-  // "/Users/johndoe/Library/Application Support/Google/Chrome/Default", and
-  // *path holds "/Users/johndoe/Library/Caches", then after
-  // parent.AppendRelativePath(child, path) is called *path will hold
-  // "/Users/johndoe/Library/Caches/Google/Chrome/Default".  Otherwise,
-  // returns false.
-  bool AppendRelativePath(const FilePath& child, FilePath* path) const;
+    // If IsParent(child) holds, appends to path (if non-NULL) the
+    // relative path to child and returns true.  For example, if parent
+    // holds "/Users/johndoe/Library/Application Support", child holds
+    // "/Users/johndoe/Library/Application Support/Google/Chrome/Default", and
+    // *path holds "/Users/johndoe/Library/Caches", then after
+    // parent.AppendRelativePath(child, path) is called *path will hold
+    // "/Users/johndoe/Library/Caches/Google/Chrome/Default".  Otherwise,
+    // returns false.
+    bool AppendRelativePath(const FilePath &child, FilePath *path) const;
 
-  // Returns a FilePath corresponding to the directory containing the path
-  // named by this object, stripping away the file component.  If this object
-  // only contains one component, returns a FilePath identifying
-  // kCurrentDirectory.  If this object already refers to the root directory,
-  // returns a FilePath identifying the root directory.
-  [[gnu::warn_unused_result]] FilePath DirName() const;
+    // Returns a FilePath corresponding to the directory containing the path
+    // named by this object, stripping away the file component.  If this object
+    // only contains one component, returns a FilePath identifying
+    // kCurrentDirectory.  If this object already refers to the root directory,
+    // returns a FilePath identifying the root directory.
+    [[gnu::warn_unused_result]] FilePath DirName() const;
 
-  // Returns a FilePath corresponding to the last path component of this
-  // object, either a file or a directory.  If this object already refers to
-  // the root directory, returns a FilePath identifying the root directory;
-  // this is the only situation in which BaseName will return an absolute path.
-  [[gnu::warn_unused_result]] FilePath BaseName() const;
+    // Returns a FilePath corresponding to the last path component of this
+    // object, either a file or a directory.  If this object already refers to
+    // the root directory, returns a FilePath identifying the root directory;
+    // this is the only situation in which BaseName will return an absolute path.
+    [[gnu::warn_unused_result]] FilePath BaseName() const;
 
-  // Returns a FilePath by appending a separator and the supplied path
-  // component to this object's path.  Append takes care to avoid adding
-  // excessive separators if this object's path already ends with a separator.
-  // If this object's path is kCurrentDirectory, a new FilePath corresponding
-  // only to |component| is returned.  |component| must be a relative path;
-  // it is an error to pass an absolute path.
-  [[gnu::warn_unused_result]] FilePath Append(StringType component) const;
-  [[gnu::warn_unused_result]] FilePath Append(const FilePath& component) const;
+    // Returns a FilePath by appending a separator and the supplied path
+    // component to this object's path.  Append takes care to avoid adding
+    // excessive separators if this object's path already ends with a separator.
+    // If this object's path is kCurrentDirectory, a new FilePath corresponding
+    // only to |component| is returned.  |component| must be a relative path;
+    // it is an error to pass an absolute path.
+    [[gnu::warn_unused_result]] FilePath Append(StringType component) const;
+    [[gnu::warn_unused_result]] FilePath Append(const FilePath &component) const;
 
-  // Returns true if this FilePath contains an absolute path.  On Windows, an
-  // absolute path begins with either a drive letter specification followed by
-  // a separator character, or with two separator characters.  On POSIX
-  // platforms, an absolute path begins with a separator character.
-  bool IsAbsolute() const;
+    // Returns true if this FilePath contains an absolute path.  On Windows, an
+    // absolute path begins with either a drive letter specification followed by
+    // a separator character, or with two separator characters.  On POSIX
+    // platforms, an absolute path begins with a separator character.
+    bool IsAbsolute() const;
 
-  // Returns true if the patch ends with a path separator character.
-  [[gnu::warn_unused_result]] bool EndsWithSeparator() const;
+    // Returns true if the patch ends with a path separator character.
+    [[gnu::warn_unused_result]] bool EndsWithSeparator() const;
 
-  // Returns a copy of this FilePath that ends with a trailing separator. If
-  // the input path is empty, an empty FilePath will be returned.
-  [[gnu::warn_unused_result]] FilePath AsEndingWithSeparator() const;
+    // Returns a copy of this FilePath that ends with a trailing separator. If
+    // the input path is empty, an empty FilePath will be returned.
+    [[gnu::warn_unused_result]] FilePath AsEndingWithSeparator() const;
 
-  // Returns a copy of this FilePath that does not end with a trailing
-  // separator.
-  [[gnu::warn_unused_result]] FilePath StripTrailingSeparators() const;
+    // Returns a copy of this FilePath that does not end with a trailing
+    // separator.
+    [[gnu::warn_unused_result]] FilePath StripTrailingSeparators() const;
 
-  // Returns true if this FilePath contains an attempt to reference a parent
-  // directory (e.g. has a path component that is "..").
-  bool ReferencesParent() const;
+    // Returns true if this FilePath contains an attempt to reference a parent
+    // directory (e.g. has a path component that is "..").
+    bool ReferencesParent() const;
 
- private:
-  // Remove trailing separators from this object.  If the path is absolute, it
-  // will never be stripped any more than to refer to the absolute root
-  // directory, so "////" will become "/", not "".  A leading pair of
-  // separators is never stripped, to support alternate roots.  This is used to
-  // support UNC paths on Windows.
-  void StripTrailingSeparatorsInternal();
+private:
+    // Remove trailing separators from this object.  If the path is absolute, it
+    // will never be stripped any more than to refer to the absolute root
+    // directory, so "////" will become "/", not "".  A leading pair of
+    // separators is never stripped, to support alternate roots.  This is used to
+    // support UNC paths on Windows.
+    void StripTrailingSeparatorsInternal();
 
-  StringType path_;
+    StringType path_;
 };
 
 // This is required by googletest to print a readable output on test failures.
 // This is declared here for use in gtest-based unit tests but is defined in
 // the test_support_base target. Depend on that to use this in your unit test.
 // This should not be used in production code - call ToString() instead.
-void PrintTo(const FilePath& path, std::ostream* out);
+void PrintTo(const FilePath &path, std::ostream *out);
 
 }  // namespace files
 

@@ -8,8 +8,8 @@
 
 namespace chromeos_update_engine {
 
-UpdateAttempterMock::UpdateAttempterMock(MockSystemState* mock_system_state,
-                                         MockDbusGlib* dbus)
+UpdateAttempterMock::UpdateAttempterMock(MockSystemState *mock_system_state,
+        MockDbusGlib *dbus)
     : UpdateAttempter(mock_system_state, dbus) {}
 
 }  // namespace chromeos_update_engine

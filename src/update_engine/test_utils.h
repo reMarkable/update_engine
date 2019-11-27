@@ -24,150 +24,168 @@ namespace chromeos_update_engine {
 
 // Writes the data passed to path. The file at path will be overwritten if it
 // exists. Returns true on success, false otherwise.
-bool WriteFileVector(const std::string& path, const std::vector<char>& data);
-bool WriteFileString(const std::string& path, const std::string& data);
+bool WriteFileVector(const std::string &path, const std::vector<char> &data);
+bool WriteFileString(const std::string &path, const std::string &data);
 
 // Reads a symlink from disk. Returns empty string on failure.
-std::string Readlink(const std::string& path);
+std::string Readlink(const std::string &path);
 
 // Gzip compresses the data passed using the gzip command line program.
 // Returns compressed data back.
-std::vector<char> GzipCompressData(const std::vector<char>& data);
+std::vector<char> GzipCompressData(const std::vector<char> &data);
 
 // Gives back a 512-bytes length array that contains an MBR with
 // the first partition is marked bootable.
 std::vector<char> GenerateSampleMbr();
 
 bool BindToUnusedLoopDevice(const std::string &filename,
-                            std::string* lo_dev_name_ptr);
+                            std::string *lo_dev_name_ptr);
 
 // Returns true iff a == b
-bool ExpectVectorsEq(const std::vector<char>& a, const std::vector<char>& b);
+bool ExpectVectorsEq(const std::vector<char> &a, const std::vector<char> &b);
 
-inline int System(const std::string& cmd) {
-  return system(cmd.c_str());
+inline int System(const std::string &cmd)
+{
+    return system(cmd.c_str());
 }
 
-void FillWithData(std::vector<char>* buffer);
+void FillWithData(std::vector<char> *buffer);
 
 namespace {
 // 300 byte pseudo-random string. Not null terminated.
 // This does not gzip compress well.
 const unsigned char kRandomString[] = {
-  0xf2, 0xb7, 0x55, 0x92, 0xea, 0xa6, 0xc9, 0x57,
-  0xe0, 0xf8, 0xeb, 0x34, 0x93, 0xd9, 0xc4, 0x8f,
-  0xcb, 0x20, 0xfa, 0x37, 0x4b, 0x40, 0xcf, 0xdc,
-  0xa5, 0x08, 0x70, 0x89, 0x79, 0x35, 0xe2, 0x3d,
-  0x56, 0xa4, 0x75, 0x73, 0xa3, 0x6d, 0xd1, 0xd5,
-  0x26, 0xbb, 0x9c, 0x60, 0xbd, 0x2f, 0x5a, 0xfa,
-  0xb7, 0xd4, 0x3a, 0x50, 0xa7, 0x6b, 0x3e, 0xfd,
-  0x61, 0x2b, 0x3a, 0x31, 0x30, 0x13, 0x33, 0x53,
-  0xdb, 0xd0, 0x32, 0x71, 0x5c, 0x39, 0xed, 0xda,
-  0xb4, 0x84, 0xca, 0xbc, 0xbd, 0x78, 0x1c, 0x0c,
-  0xd8, 0x0b, 0x41, 0xe8, 0xe1, 0xe0, 0x41, 0xad,
-  0x03, 0x12, 0xd3, 0x3d, 0xb8, 0x75, 0x9b, 0xe6,
-  0xd9, 0x01, 0xd0, 0x87, 0xf4, 0x36, 0xfa, 0xa7,
-  0x0a, 0xfa, 0xc5, 0x87, 0x65, 0xab, 0x9a, 0x7b,
-  0xeb, 0x58, 0x23, 0xf0, 0xa8, 0x0a, 0xf2, 0x33,
-  0x3a, 0xe2, 0xe3, 0x35, 0x74, 0x95, 0xdd, 0x3c,
-  0x59, 0x5a, 0xd9, 0x52, 0x3a, 0x3c, 0xac, 0xe5,
-  0x15, 0x87, 0x6d, 0x82, 0xbc, 0xf8, 0x7d, 0xbe,
-  0xca, 0xd3, 0x2c, 0xd6, 0xec, 0x38, 0xeb, 0xe4,
-  0x53, 0xb0, 0x4c, 0x3f, 0x39, 0x29, 0xf7, 0xa4,
-  0x73, 0xa8, 0xcb, 0x32, 0x50, 0x05, 0x8c, 0x1c,
-  0x1c, 0xca, 0xc9, 0x76, 0x0b, 0x8f, 0x6b, 0x57,
-  0x1f, 0x24, 0x2b, 0xba, 0x82, 0xba, 0xed, 0x58,
-  0xd8, 0xbf, 0xec, 0x06, 0x64, 0x52, 0x6a, 0x3f,
-  0xe4, 0xad, 0xce, 0x84, 0xb4, 0x27, 0x55, 0x14,
-  0xe3, 0x75, 0x59, 0x73, 0x71, 0x51, 0xea, 0xe8,
-  0xcc, 0xda, 0x4f, 0x09, 0xaf, 0xa4, 0xbc, 0x0e,
-  0xa6, 0x1f, 0xe2, 0x3a, 0xf8, 0x96, 0x7d, 0x30,
-  0x23, 0xc5, 0x12, 0xb5, 0xd8, 0x73, 0x6b, 0x71,
-  0xab, 0xf1, 0xd7, 0x43, 0x58, 0xa7, 0xc9, 0xf0,
-  0xe4, 0x85, 0x1c, 0xd6, 0x92, 0x50, 0x2c, 0x98,
-  0x36, 0xfe, 0x87, 0xaf, 0x43, 0x8f, 0x8f, 0xf5,
-  0x88, 0x48, 0x18, 0x42, 0xcf, 0x42, 0xc1, 0xa8,
-  0xe8, 0x05, 0x08, 0xa1, 0x45, 0x70, 0x5b, 0x8c,
-  0x39, 0x28, 0xab, 0xe9, 0x6b, 0x51, 0xd2, 0xcb,
-  0x30, 0x04, 0xea, 0x7d, 0x2f, 0x6e, 0x6c, 0x3b,
-  0x5f, 0x82, 0xd9, 0x5b, 0x89, 0x37, 0x65, 0x65,
-  0xbe, 0x9f, 0xa3, 0x5d
+    0xf2, 0xb7, 0x55, 0x92, 0xea, 0xa6, 0xc9, 0x57,
+    0xe0, 0xf8, 0xeb, 0x34, 0x93, 0xd9, 0xc4, 0x8f,
+    0xcb, 0x20, 0xfa, 0x37, 0x4b, 0x40, 0xcf, 0xdc,
+    0xa5, 0x08, 0x70, 0x89, 0x79, 0x35, 0xe2, 0x3d,
+    0x56, 0xa4, 0x75, 0x73, 0xa3, 0x6d, 0xd1, 0xd5,
+    0x26, 0xbb, 0x9c, 0x60, 0xbd, 0x2f, 0x5a, 0xfa,
+    0xb7, 0xd4, 0x3a, 0x50, 0xa7, 0x6b, 0x3e, 0xfd,
+    0x61, 0x2b, 0x3a, 0x31, 0x30, 0x13, 0x33, 0x53,
+    0xdb, 0xd0, 0x32, 0x71, 0x5c, 0x39, 0xed, 0xda,
+    0xb4, 0x84, 0xca, 0xbc, 0xbd, 0x78, 0x1c, 0x0c,
+    0xd8, 0x0b, 0x41, 0xe8, 0xe1, 0xe0, 0x41, 0xad,
+    0x03, 0x12, 0xd3, 0x3d, 0xb8, 0x75, 0x9b, 0xe6,
+    0xd9, 0x01, 0xd0, 0x87, 0xf4, 0x36, 0xfa, 0xa7,
+    0x0a, 0xfa, 0xc5, 0x87, 0x65, 0xab, 0x9a, 0x7b,
+    0xeb, 0x58, 0x23, 0xf0, 0xa8, 0x0a, 0xf2, 0x33,
+    0x3a, 0xe2, 0xe3, 0x35, 0x74, 0x95, 0xdd, 0x3c,
+    0x59, 0x5a, 0xd9, 0x52, 0x3a, 0x3c, 0xac, 0xe5,
+    0x15, 0x87, 0x6d, 0x82, 0xbc, 0xf8, 0x7d, 0xbe,
+    0xca, 0xd3, 0x2c, 0xd6, 0xec, 0x38, 0xeb, 0xe4,
+    0x53, 0xb0, 0x4c, 0x3f, 0x39, 0x29, 0xf7, 0xa4,
+    0x73, 0xa8, 0xcb, 0x32, 0x50, 0x05, 0x8c, 0x1c,
+    0x1c, 0xca, 0xc9, 0x76, 0x0b, 0x8f, 0x6b, 0x57,
+    0x1f, 0x24, 0x2b, 0xba, 0x82, 0xba, 0xed, 0x58,
+    0xd8, 0xbf, 0xec, 0x06, 0x64, 0x52, 0x6a, 0x3f,
+    0xe4, 0xad, 0xce, 0x84, 0xb4, 0x27, 0x55, 0x14,
+    0xe3, 0x75, 0x59, 0x73, 0x71, 0x51, 0xea, 0xe8,
+    0xcc, 0xda, 0x4f, 0x09, 0xaf, 0xa4, 0xbc, 0x0e,
+    0xa6, 0x1f, 0xe2, 0x3a, 0xf8, 0x96, 0x7d, 0x30,
+    0x23, 0xc5, 0x12, 0xb5, 0xd8, 0x73, 0x6b, 0x71,
+    0xab, 0xf1, 0xd7, 0x43, 0x58, 0xa7, 0xc9, 0xf0,
+    0xe4, 0x85, 0x1c, 0xd6, 0x92, 0x50, 0x2c, 0x98,
+    0x36, 0xfe, 0x87, 0xaf, 0x43, 0x8f, 0x8f, 0xf5,
+    0x88, 0x48, 0x18, 0x42, 0xcf, 0x42, 0xc1, 0xa8,
+    0xe8, 0x05, 0x08, 0xa1, 0x45, 0x70, 0x5b, 0x8c,
+    0x39, 0x28, 0xab, 0xe9, 0x6b, 0x51, 0xd2, 0xcb,
+    0x30, 0x04, 0xea, 0x7d, 0x2f, 0x6e, 0x6c, 0x3b,
+    0x5f, 0x82, 0xd9, 0x5b, 0x89, 0x37, 0x65, 0x65,
+    0xbe, 0x9f, 0xa3, 0x5d
 };
 
-const char* const kMountPath = "/tmp/UpdateEngineTests_mnt";
+const char *const kMountPath = "/tmp/UpdateEngineTests_mnt";
 }  // namespace {}
 
 // Creates an empty ext image.
-void CreateEmptyExtImageAtPath(const std::string& path,
+void CreateEmptyExtImageAtPath(const std::string &path,
                                size_t size,
                                int block_size);
 
 // Creates an ext image with some files in it. The paths creates are
 // returned in out_paths.
-void CreateExtImageAtPath(const std::string& path,
-                          std::vector<std::string>* out_paths);
+void CreateExtImageAtPath(const std::string &path,
+                          std::vector<std::string> *out_paths);
 
 // Verifies that for each path in paths, it exists in the filesystem under
 // parent. Also, verifies that no additional paths are present under parent.
 // Also tests properties of various files created by CreateExtImageAtPath().
 // Intentionally copies expected_paths.
-void VerifyAllPaths(const std::string& parent,
+void VerifyAllPaths(const std::string &parent,
                     std::set<std::string> expected_paths);
 
-class ScopedLoopbackDeviceBinder {
- public:
-  ScopedLoopbackDeviceBinder(const std::string& file, std::string* dev) {
-    is_bound_ = BindToUnusedLoopDevice(file, &dev_);
-    EXPECT_TRUE(is_bound_);
+class ScopedLoopbackDeviceBinder
+{
+public:
+    ScopedLoopbackDeviceBinder(const std::string &file, std::string *dev)
+    {
+        is_bound_ = BindToUnusedLoopDevice(file, &dev_);
+        EXPECT_TRUE(is_bound_);
 
-    if (is_bound_ && dev)
-      *dev = dev_;
-  }
-
-  ~ScopedLoopbackDeviceBinder() {
-    if (!is_bound_)
-      return;
-
-    for (int retry = 0; retry < 5; retry++) {
-      std::vector<std::string> args;
-      args.push_back("/sbin/losetup");
-      args.push_back("-d");
-      args.push_back(dev_);
-      int return_code = 0;
-      EXPECT_TRUE(Subprocess::SynchronousExec(args, &return_code, NULL));
-      if (return_code == 0) {
-        return;
-      }
-      sleep(1);
+        if (is_bound_ && dev) {
+            *dev = dev_;
+        }
     }
-    ADD_FAILURE();
-  }
 
-  const std::string &dev() {
-    EXPECT_TRUE(is_bound_);
-    return dev_;
-  }
+    ~ScopedLoopbackDeviceBinder()
+    {
+        if (!is_bound_) {
+            return;
+        }
 
-  bool is_bound() const { return is_bound_; }
+        for (int retry = 0; retry < 5; retry++) {
+            std::vector<std::string> args;
+            args.push_back("/sbin/losetup");
+            args.push_back("-d");
+            args.push_back(dev_);
+            int return_code = 0;
+            EXPECT_TRUE(Subprocess::SynchronousExec(args, &return_code, NULL));
 
- private:
-  std::string dev_;
-  bool is_bound_;
-  DISALLOW_COPY_AND_ASSIGN(ScopedLoopbackDeviceBinder);
+            if (return_code == 0) {
+                return;
+            }
+
+            sleep(1);
+        }
+
+        ADD_FAILURE();
+    }
+
+    const std::string &dev()
+    {
+        EXPECT_TRUE(is_bound_);
+        return dev_;
+    }
+
+    bool is_bound() const
+    {
+        return is_bound_;
+    }
+
+private:
+    std::string dev_;
+    bool is_bound_;
+    DISALLOW_COPY_AND_ASSIGN(ScopedLoopbackDeviceBinder);
 };
 
-class ScopedTempFile {
- public:
-  ScopedTempFile() {
-    EXPECT_TRUE(utils::MakeTempFile("/tmp/update_engine_test_temp_file.XXXXXX",
-                                    &path_,
-                                    NULL));
-    unlinker_.reset(new ScopedPathUnlinker(path_));
-  }
-  const std::string& GetPath() { return path_; }
- private:
-  std::string path_;
-  std::unique_ptr<ScopedPathUnlinker> unlinker_;
+class ScopedTempFile
+{
+public:
+    ScopedTempFile()
+    {
+        EXPECT_TRUE(utils::MakeTempFile("/tmp/update_engine_test_temp_file.XXXXXX",
+                                        &path_,
+                                        NULL));
+        unlinker_.reset(new ScopedPathUnlinker(path_));
+    }
+    const std::string &GetPath()
+    {
+        return path_;
+    }
+private:
+    std::string path_;
+    std::unique_ptr<ScopedPathUnlinker> unlinker_;
 };
 
 // Useful actions for test
@@ -178,148 +196,189 @@ template<typename T>
 class ObjectFeederAction;
 
 template<typename T>
-class ActionTraits<ObjectFeederAction<T> > {
- public:
-  typedef T OutputObjectType;
-  typedef NoneType InputObjectType;
+class ActionTraits<ObjectFeederAction<T>>
+{
+public:
+    typedef T OutputObjectType;
+    typedef NoneType InputObjectType;
 };
 
 // This is a simple Action class for testing. It feeds an object into
 // another action.
 template<typename T>
-struct ObjectFeederAction : public Action<ObjectFeederAction<T> > {
- public:
-  typedef NoneType InputObjectType;
-  typedef T OutputObjectType;
-  void PerformAction() {
-    LOG(INFO) << "feeder running!";
-    CHECK(this->processor_);
-    if (this->HasOutputPipe()) {
-      this->SetOutputObject(out_obj_);
+struct ObjectFeederAction : public Action<ObjectFeederAction<T>> {
+public:
+    typedef NoneType InputObjectType;
+    typedef T OutputObjectType;
+    void PerformAction()
+    {
+        LOG(INFO) << "feeder running!";
+        CHECK(this->processor_);
+
+        if (this->HasOutputPipe()) {
+            this->SetOutputObject(out_obj_);
+        }
+
+        this->processor_->ActionComplete(this, kActionCodeSuccess);
     }
-    this->processor_->ActionComplete(this, kActionCodeSuccess);
-  }
-  static std::string StaticType() { return "ObjectFeederAction"; }
-  std::string Type() const { return StaticType(); }
-  void set_obj(const T& out_obj) {
-    out_obj_ = out_obj;
-  }
- private:
-  T out_obj_;
+    static std::string StaticType()
+    {
+        return "ObjectFeederAction";
+    }
+    std::string Type() const
+    {
+        return StaticType();
+    }
+    void set_obj(const T &out_obj)
+    {
+        out_obj_ = out_obj;
+    }
+private:
+    T out_obj_;
 };
 
 template<typename T>
 class ObjectCollectorAction;
 
 template<typename T>
-class ActionTraits<ObjectCollectorAction<T> > {
- public:
-  typedef NoneType OutputObjectType;
-  typedef T InputObjectType;
+class ActionTraits<ObjectCollectorAction<T>>
+{
+public:
+    typedef NoneType OutputObjectType;
+    typedef T InputObjectType;
 };
 
 // This is a simple Action class for testing. It receives an object from
 // another action.
 template<typename T>
-struct ObjectCollectorAction : public Action<ObjectCollectorAction<T> > {
- public:
-  typedef T InputObjectType;
-  typedef NoneType OutputObjectType;
+struct ObjectCollectorAction : public Action<ObjectCollectorAction<T>> {
+public:
+    typedef T InputObjectType;
+    typedef NoneType OutputObjectType;
 
-  ObjectCollectorAction() : ran_(false) {}
-  virtual ~ObjectCollectorAction() {}
+    ObjectCollectorAction() : ran_(false) {}
+    virtual ~ObjectCollectorAction() {}
 
-  void PerformAction() {
-    LOG(INFO) << "collector running!";
-    ASSERT_TRUE(this->processor_);
-    if (this->HasInputObject()) {
-      object_ = this->GetInputObject();
-      ran_ = true;
+    void PerformAction()
+    {
+        LOG(INFO) << "collector running!";
+        ASSERT_TRUE(this->processor_);
+
+        if (this->HasInputObject()) {
+            object_ = this->GetInputObject();
+            ran_ = true;
+        }
+
+        this->processor_->ActionComplete(this, kActionCodeSuccess);
     }
-    this->processor_->ActionComplete(this, kActionCodeSuccess);
-  }
 
-  static std::string StaticType() { return "ObjectCollectorAction"; }
-  std::string Type() const { return StaticType(); }
-  const T& object() const { return object_; }
-  bool ran() const { return ran_; }
+    static std::string StaticType()
+    {
+        return "ObjectCollectorAction";
+    }
+    std::string Type() const
+    {
+        return StaticType();
+    }
+    const T &object() const
+    {
+        return object_;
+    }
+    bool ran() const
+    {
+        return ran_;
+    }
 
- private:
-  T object_;
-  bool ran_;
+private:
+    T object_;
+    bool ran_;
 };
 
 // A delegate for verifying that the ActionProcessor completed an Action.
 // Use RunProcessor or RunProcessorInMainLoop depending on if any actions
 // are synchronous are asynchronous and use the glib main loop.
 template<typename T>
-class ActionTestDelegate : public ActionProcessorDelegate {
- public:
-  ActionTestDelegate() : ran_(false), main_loop_(nullptr) {}
-  virtual ~ActionTestDelegate() {}
+class ActionTestDelegate : public ActionProcessorDelegate
+{
+public:
+    ActionTestDelegate() : ran_(false), main_loop_(nullptr) {}
+    virtual ~ActionTestDelegate() {}
 
-  void RunProcessor(ActionProcessor* processor) {
-    processor->set_delegate(this);
-    processor->StartProcessing();
-    EXPECT_FALSE(processor->IsRunning());
-  }
-
-  void RunProcessorInMainLoop(ActionProcessor* processor) {
-    processor->set_delegate(this);
-    main_loop_ = g_main_loop_new(g_main_context_default(), FALSE);
-    g_timeout_add(0, &StartProcessingInMainLoop, processor);
-    g_main_loop_run(main_loop_);
-    g_main_loop_unref(main_loop_);
-    main_loop_ = nullptr;
-    EXPECT_FALSE(processor->IsRunning());
-  }
-
-  void ProcessingDone(const ActionProcessor* processor,
-                      ActionExitCode code) {
-    if (main_loop_)
-      g_main_loop_quit(main_loop_);
-  }
-
-  void ActionCompleted(ActionProcessor* processor,
-                       AbstractAction* action,
-                       ActionExitCode code) {
-    if (action->Type() == T::StaticType()) {
-      ran_ = true;
-      code_ = code;
-    } else {
-      EXPECT_EQ(kActionCodeSuccess, code);
+    void RunProcessor(ActionProcessor *processor)
+    {
+        processor->set_delegate(this);
+        processor->StartProcessing();
+        EXPECT_FALSE(processor->IsRunning());
     }
-  }
 
-  bool ran() const { return ran_; }
-  ActionExitCode code() const { return code_; }
+    void RunProcessorInMainLoop(ActionProcessor *processor)
+    {
+        processor->set_delegate(this);
+        main_loop_ = g_main_loop_new(g_main_context_default(), FALSE);
+        g_timeout_add(0, &StartProcessingInMainLoop, processor);
+        g_main_loop_run(main_loop_);
+        g_main_loop_unref(main_loop_);
+        main_loop_ = nullptr;
+        EXPECT_FALSE(processor->IsRunning());
+    }
 
- private:
-  static gboolean StartProcessingInMainLoop(gpointer data) {
-    ActionProcessor *processor = reinterpret_cast<ActionProcessor*>(data);
-    processor->StartProcessing();
-    return FALSE;
-  }
+    void ProcessingDone(const ActionProcessor *processor,
+                        ActionExitCode code)
+    {
+        if (main_loop_) {
+            g_main_loop_quit(main_loop_);
+        }
+    }
 
-  bool ran_;
-  ActionExitCode code_;
-  GMainLoop* main_loop_;
+    void ActionCompleted(ActionProcessor *processor,
+                         AbstractAction *action,
+                         ActionExitCode code)
+    {
+        if (action->Type() == T::StaticType()) {
+            ran_ = true;
+            code_ = code;
+        } else {
+            EXPECT_EQ(kActionCodeSuccess, code);
+        }
+    }
+
+    bool ran() const
+    {
+        return ran_;
+    }
+    ActionExitCode code() const
+    {
+        return code_;
+    }
+
+private:
+    static gboolean StartProcessingInMainLoop(gpointer data)
+    {
+        ActionProcessor *processor = reinterpret_cast<ActionProcessor *>(data);
+        processor->StartProcessing();
+        return FALSE;
+    }
+
+    bool ran_;
+    ActionExitCode code_;
+    GMainLoop *main_loop_;
 };
 
-class ScopedLoopMounter {
- public:
-  explicit ScopedLoopMounter(const std::string& file_path,
-                             std::string* mnt_path,
-                             unsigned long flags);
+class ScopedLoopMounter
+{
+public:
+    explicit ScopedLoopMounter(const std::string &file_path,
+                               std::string *mnt_path,
+                               unsigned long flags);
 
- private:
-  // These objects must be destructed in the following order:
-  //   ScopedFilesystemUnmounter (the file system must be unmounted first)
-  //   ScopedLoopbackDeviceBinder (then the loop device can be deleted)
-  //   ScopedDirRemover (then the mount point can be deleted)
-  std::unique_ptr<ScopedDirRemover> dir_remover_;
-  std::unique_ptr<ScopedLoopbackDeviceBinder> loop_binder_;
-  std::unique_ptr<ScopedFilesystemUnmounter> unmounter_;
+private:
+    // These objects must be destructed in the following order:
+    //   ScopedFilesystemUnmounter (the file system must be unmounted first)
+    //   ScopedLoopbackDeviceBinder (then the loop device can be deleted)
+    //   ScopedDirRemover (then the mount point can be deleted)
+    std::unique_ptr<ScopedDirRemover> dir_remover_;
+    std::unique_ptr<ScopedLoopbackDeviceBinder> loop_binder_;
+    std::unique_ptr<ScopedFilesystemUnmounter> unmounter_;
 };
 
 }  // namespace chromeos_update_engine

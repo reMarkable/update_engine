@@ -16,6 +16,7 @@
 #include "update_engine/postinstall_runner_action.h"
 #include "update_engine/test_utils.h"
 #include "update_engine/utils.h"
+#include "files/file_util.h"
 
 using std::string;
 using std::vector;
@@ -85,7 +86,7 @@ void PostinstallRunnerActionTest::DoTest(bool do_losetup, int err_code)
 
     // put a postinst script in
     string script = StringPrintf("#!/bin/bash\n"
-                                 "touch %s/postinst_called\n",
+                                 "echo $@ > %s/postinst_called\n",
                                  cwd.c_str());
 
     if (err_code) {
@@ -115,6 +116,7 @@ void PostinstallRunnerActionTest::DoTest(bool do_losetup, int err_code)
     ObjectFeederAction<InstallPlan> feeder_action;
     InstallPlan install_plan;
     install_plan.partition_path = dev;
+    install_plan.postinst_args.push_back("NEW_VERSION=1.2.3.4");
     feeder_action.set_obj(install_plan);
 
     PostinstallRunnerAction runner_action;
@@ -142,31 +144,23 @@ void PostinstallRunnerActionTest::DoTest(bool do_losetup, int err_code)
         EXPECT_EQ(kActionCodePostinstallBootedFromFirmwareB, delegate.code());
     }
 
-    struct stat stbuf;
-
-    int rc = lstat((string(cwd) + "/postinst_called").c_str(), &stbuf);
-
+    string file_contents;
+    files::FilePath postinst_path(string(cwd) + "/postinst_called");
     if (do_losetup && !err_code) {
-        ASSERT_EQ(0, rc);
+        EXPECT_TRUE(files::ReadFileToString(postinst_path, &file_contents));
+        EXPECT_NE(file_contents.find("NEW_VERSION="), std::string::npos);
     } else {
-        ASSERT_LT(rc, 0);
+        EXPECT_FALSE(files::ReadFileToString(postinst_path, &file_contents));
     }
 
     if (do_losetup) {
         loop_releaser.reset(NULL);
     }
 
-    ASSERT_EQ(0, System(string("rm -f ") + cwd + "/postinst_called"));
-    ASSERT_EQ(0, System(string("rm -f ") + cwd + "/image.dat"));
-}
+    files::FilePath image_path(string(cwd) + "/image.dat");
 
-// Death tests don't seem to be working on Hardy
-TEST_F(PostinstallRunnerActionTest, DISABLED_RunAsRootDeathTest)
-{
-    ASSERT_EQ(0, getuid());
-    PostinstallRunnerAction runner_action;
-    ASSERT_DEATH({ runner_action.TerminateProcessing(); },
-                 "postinstall_runner_action.h:.*] Check failed");
+    files::DeleteFile(image_path, false);
+    files::DeleteFile(postinst_path, false);
 }
 
 }  // namespace chromeos_update_engine

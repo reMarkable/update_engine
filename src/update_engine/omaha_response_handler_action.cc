@@ -42,9 +42,12 @@ void OmahaResponseHandlerAction::PerformAction()
     // All decisions as to which URL should be used have already been done. So,
     // make the download URL as the payload URL at the current url index.
     uint32_t url_index = system_state_->payload_state()->GetUrlIndex();
-    LOG(INFO) << "Using Url" << url_index << " as the download url this time";
+    LOG(INFO) << "Using Url " << url_index << " as the download url this time";
     CHECK(url_index < response.payload_urls.size());
     install_plan_.download_url = response.payload_urls[url_index];
+
+    install_plan_.postinst_args.push_back(
+            "NEW_VERSION=" + response.display_version);
 
     // Fill up the other properties based on the response.
     install_plan_.display_version = response.display_version;

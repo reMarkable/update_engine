@@ -37,6 +37,10 @@ bool OmahaRequestParams::Init(bool interactive)
 {
     os_platform_ = OmahaRequestParams::kOsPlatform;
     os_version_ = OmahaRequestParams::kOsVersion;
+    if (utils::GetMachineModel().find("reMarkable 2.0") != string::npos) {
+        os_platform_ = "RM110";
+    }
+
     oemid_ = GetConfValue("deviceid", "");
     oemversion_ = GetOemValue("VERSION_ID", "");
     app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");

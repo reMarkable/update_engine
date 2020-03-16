@@ -46,6 +46,8 @@ std::string GetMachineId();
 // Creates and returns a new uuid
 std::string GetUuid();
 
+std::string GetMachineModel();
+
 // Writes the data passed to path. The file at path will be overwritten if it
 // exists. Returns true on success, false otherwise.
 bool WriteFile(const char *path, const char *data, int data_len);

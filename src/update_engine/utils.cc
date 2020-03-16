@@ -64,6 +64,7 @@ static const char kBootId[] = "/proc/sys/kernel/random/boot_id";
 static const char kMachineId[] = "/etc/machine-id";
 static const char kDevImageMarker[] = "/root/.dev_mode";
 static const char kGenUuid[] = "/proc/sys/kernel/random/uuid";
+static const char kMachineModel[] = "/sys/devices/soc0/machine";
 
 bool IsOfficialBuild()
 {
@@ -125,6 +126,20 @@ string GetUuid()
     guid.append(id);
     guid.append(1, '}');
     return guid;
+}
+
+string GetMachineModel()
+{
+    string machine;
+
+    if (!files::ReadFileToString(files::FilePath(kMachineModel), &machine)) {
+        LOG(ERROR) << "Unable to read machine model";
+        return "";
+    }
+
+    machine = strings::TrimWhitespace(machine);
+
+    return machine;
 }
 
 bool WriteFile(const char *path, const char *data, int data_len)

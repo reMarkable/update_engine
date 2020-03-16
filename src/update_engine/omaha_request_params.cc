@@ -27,16 +27,20 @@ namespace chromeos_update_engine {
 
 const char *const OmahaRequestParams::kAppId(
     "{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}");
+const char *const OmahaRequestParams::kOsVersion("codex");
 const char *const OmahaRequestParams::kOsPlatform("reMarkable");
-const char *const OmahaRequestParams::kOsVersion("zg");
 const char *const OmahaRequestParams::kDefaultChannel("stable");
 const char *const kProductionOmahaUrl(
     "https://updates.cloud.remarkable.engineering/service/update2");
 
 bool OmahaRequestParams::Init(bool interactive)
 {
-    os_platform_ = OmahaRequestParams::kOsPlatform;
     os_version_ = OmahaRequestParams::kOsVersion;
+    if ( GetOemValue("ID", "") == "codex" ) {
+        os_version_ += " " + GetOemValue("VERSION_ID", "");
+    }
+
+    os_platform_ = OmahaRequestParams::kOsPlatform;
     if (utils::GetMachineModel().find("reMarkable 2.0") != string::npos) {
         os_platform_ = "RM110";
     }

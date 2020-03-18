@@ -29,9 +29,9 @@ const char *const OmahaRequestParams::kAppId(
     "{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}");
 const char *const OmahaRequestParams::kOsVersion("codex");
 const char *const OmahaRequestParams::kOsPlatform("reMarkable");
-const char *const OmahaRequestParams::kDefaultChannel("stable");
+const char *const OmahaRequestParams::kDefaultChannel("Prod");
 const char *const kProductionOmahaUrl(
-    "https://updates.cloud.remarkable.engineering/service/update2");
+    "https://get-updates.cloud.remarkable.engineering/service/update2");
 
 bool OmahaRequestParams::Init(bool interactive)
 {

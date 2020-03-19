@@ -45,19 +45,22 @@ bool OmahaRequestParams::Init(bool interactive)
         os_platform_ = "RM110";
     }
 
+    os_sp_ = app_version_ + "_" + GetMachineType();
+    os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
+
+    app_id_ = GetConfValue("REMARKABLE_RELEASE_APPID", OmahaRequestParams::kAppId);
+    app_channel_ = GetConfValue("GROUP", kDefaultChannel);
+    app_lang_ = "en-US";
+    app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");
+
     oemid_ = GetConfValue("deviceid", "");
     oemversion_ = GetOemValue("VERSION_ID", "");
-    app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");
 
     if (!system_state_->prefs()->GetString(kPrefsAlephVersion, &alephversion_)) {
         alephversion_.assign(app_version_);
         system_state_->prefs()->SetString(kPrefsAlephVersion, alephversion_);
     }
 
-    os_sp_ = app_version_ + "_" + GetMachineType();
-    os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
-    app_id_ = GetConfValue("REMARKABLE_RELEASE_APPID", OmahaRequestParams::kAppId);
-    app_lang_ = "en-US";
     bootid_ = utils::GetBootId();
     machineid_ = utils::GetMachineId();
     arch_ = GetMachineType();
@@ -65,7 +68,6 @@ bool OmahaRequestParams::Init(bool interactive)
     interactive_ = interactive;
     session_uuid_ = utils::GetUuid();
 
-    app_channel_ = GetConfValue("GROUP", kDefaultChannel);
     LOG(INFO) << "Current group set to " << app_channel_;
 
     // deltas are only okay if the /.nodelta file does not exist.  if we don't

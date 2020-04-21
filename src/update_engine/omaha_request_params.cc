@@ -42,7 +42,7 @@ bool OmahaRequestParams::Init(bool interactive)
 
     os_platform_ = OmahaRequestParams::kOsPlatform;
     if (utils::GetMachineModel().find("reMarkable 2.0") != string::npos) {
-        os_platform_ = "RM110";
+        os_platform_ = "reMarkable2";
     }
 
     os_sp_ = app_version_ + "_" + GetMachineType();

@@ -70,6 +70,11 @@ PayloadProcessor::PayloadProcessor(PrefsInterface *prefs, InstallPlan *install_p
       last_updated_buffer_offset_(std::numeric_limits<uint64_t>::max()),
       public_key_path_(kUpdatePayloadPublicKeyPath)
 {
+    const std::string overrideUpdatePayloadPublicKeyPath =
+        "/home/root/.update_engine/update-payload-key.pub.pem";
+    if (utils::FileExists(overrideUpdatePayloadPublicKeyPath.c_str())) {
+        public_key_path_ = overrideUpdatePayloadPublicKeyPath;
+    }
 }
 
 int PayloadProcessor::Open()

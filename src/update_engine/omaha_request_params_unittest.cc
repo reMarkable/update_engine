@@ -140,7 +140,7 @@ TEST_F(OmahaRequestParamsTest, MissingChannelTest)
     EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
     EXPECT_EQ("0.2.2.3", out.app_version());
     EXPECT_EQ("en-US", out.app_lang());
-    EXPECT_EQ("stable", out.app_channel());
+    EXPECT_EQ("Prod", out.app_channel());
 }
 
 TEST_F(OmahaRequestParamsTest, ConfusingReleaseTest)
@@ -157,7 +157,7 @@ TEST_F(OmahaRequestParamsTest, ConfusingReleaseTest)
     EXPECT_EQ("{98DA7DF2-4E3E-4744-9DE6-EC931886ABAB}", out.app_id());
     EXPECT_EQ("0.2.2.3", out.app_version());
     EXPECT_EQ("en-US", out.app_lang());
-    EXPECT_EQ("stable", out.app_channel());
+    EXPECT_EQ("Prod", out.app_channel());
 }
 
 TEST_F(OmahaRequestParamsTest, MissingVersionTest)

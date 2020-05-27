@@ -27,6 +27,9 @@ namespace chromeos_update_engine {
 const char PayloadProcessor::kUpdatePayloadPublicKeyPath[] =
     "/usr/share/update_engine/update-payload-key.pub.pem";
 
+const char PayloadProcessor::kUpdatePayloadPublicKeyOverridePath[] =
+    "/home/root/.update_engine/update-payload-key.pub.pem";
+
 namespace {
 const int kUpdateStateOperationInvalid = -1;
 const int kMaxResumedUpdateFailures = 10;
@@ -68,13 +71,9 @@ PayloadProcessor::PayloadProcessor(PrefsInterface *prefs, InstallPlan *install_p
       next_operation_num_(0),
       buffer_offset_(0),
       last_updated_buffer_offset_(std::numeric_limits<uint64_t>::max()),
-      public_key_path_(kUpdatePayloadPublicKeyPath)
+      public_key_path_(kUpdatePayloadPublicKeyPath),
+      public_key_override_path_(kUpdatePayloadPublicKeyOverridePath)
 {
-    const std::string overrideUpdatePayloadPublicKeyPath =
-        "/home/root/.update_engine/update-payload-key.pub.pem";
-    if (utils::FileExists(overrideUpdatePayloadPublicKeyPath.c_str())) {
-        public_key_path_ = overrideUpdatePayloadPublicKeyPath;
-    }
 }
 
 int PayloadProcessor::Open()
@@ -347,7 +346,6 @@ bool PayloadProcessor::ExtractSignatureMessage(const vector<char> &data)
 
 ActionExitCode PayloadProcessor::VerifyPayload()
 {
-    LOG(INFO) << "Verifying delta payload using public key: " << public_key_path_;
 
     // Verifies the download size.
     TEST_AND_RETURN_VAL(kActionCodePayloadSizeMismatchError,
@@ -366,37 +364,61 @@ ActionExitCode PayloadProcessor::VerifyPayload()
                         SetNewPartitionInfo());
     TEST_AND_RETURN_VAL(kActionCodeDownloadPayloadVerificationError,
                         SetNewKernelInfo());
+    TEST_AND_RETURN_VAL(kActionCodeSignedDeltaPayloadExpectedError,
+                        !signatures_message_data_.empty());
 
-    // Verifies the signed payload hash.
-    if (!utils::FileExists(public_key_path_.c_str())) {
-        LOG(WARNING) << "Not verifying signed delta payload -- missing public key.";
+    // Check if keys exists before verifying the signed payload hash
+    if (!utils::FileExists(public_key_path_.c_str()) &&
+        !utils::FileExists(public_key_override_path_.c_str())) {
+        LOG(WARNING) << "Not verifying signed delta payload -- missing public key(s): "
+                     << public_key_override_path_ << " and " << public_key_path_;
         return kActionCodeSuccess;
     }
 
-    TEST_AND_RETURN_VAL(kActionCodeSignedDeltaPayloadExpectedError,
-                        !signatures_message_data_.empty());
-    vector<char> signed_hash_data;
-    TEST_AND_RETURN_VAL(kActionCodeDownloadPayloadPubKeyVerificationError,
-                        PayloadSigner::VerifySignature(
-                            signatures_message_data_,
-                            public_key_path_,
-                            &signed_hash_data));
-    OmahaHashCalculator signed_hasher;
-    TEST_AND_RETURN_VAL(kActionCodeDownloadPayloadPubKeyVerificationError,
-                        signed_hasher.SetContext(signed_hash_context_));
-    TEST_AND_RETURN_VAL(kActionCodeDownloadPayloadPubKeyVerificationError,
-                        signed_hasher.Finalize());
-    vector<char> hash_data = signed_hasher.raw_hash();
-    PayloadSigner::PadRSA2048SHA256Hash(&hash_data);
-    TEST_AND_RETURN_VAL(kActionCodeDownloadPayloadPubKeyVerificationError,
-                        !hash_data.empty());
+    // Verifies the signed payload hash.
+    bool payloadVerified = true;
+    const std::vector<std::string> key_paths = { public_key_override_path_, public_key_path_ };
+    for (const auto& key: key_paths) {
+        // has to be reset for each run
+        payloadVerified = true;
+        if (!utils::FileExists(key.c_str())) {
+            continue;
+        }
+        LOG(INFO) << "Verifying delta payload using public key: " << key;
 
-    if (hash_data != signed_hash_data) {
-        LOG(ERROR) << "Public key verification failed, thus update failed. "
-                   "Attached Signature:";
-        utils::HexDumpVector(signed_hash_data);
-        LOG(ERROR) << "Computed Signature:";
-        utils::HexDumpVector(hash_data);
+        vector<char> signed_hash_data;
+        if (!PayloadSigner::VerifySignature(signatures_message_data_, key, &signed_hash_data)) {
+            payloadVerified = false;
+        }
+        OmahaHashCalculator signed_hasher;
+        if (!signed_hasher.SetContext(signed_hash_context_)) {
+            payloadVerified = false;
+        }
+        if (!signed_hasher.Finalize()) {
+            payloadVerified = false;
+        }
+        vector<char> hash_data = signed_hasher.raw_hash();
+        PayloadSigner::PadRSA2048SHA256Hash(&hash_data);
+        if (hash_data.empty()) {
+            payloadVerified = false;
+        }
+        if (hash_data != signed_hash_data) {
+            payloadVerified = false;
+            LOG(WARNING) << "Public key verification failed with key: " << key;
+            LOG(WARNING) << "Attached Signature: ";
+            utils::HexDumpVector(signed_hash_data);
+            LOG(WARNING) << "Computed Signature: ";
+            utils::HexDumpVector(hash_data);
+        } else { // hash_data == signed_hash_data
+            if (payloadVerified) {
+                LOG(INFO) << "Public key verification succeded with key: " << key;
+                break;
+            }
+        }
+    }
+
+    if (!payloadVerified) {
+        LOG(ERROR) << "Public key verification failed, thus update failed.";
         return kActionCodeDownloadPayloadPubKeyVerificationError;
     }
 

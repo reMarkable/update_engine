@@ -29,6 +29,7 @@ class PayloadProcessor : public FileWriter
 public:
 
     static const char kUpdatePayloadPublicKeyPath[];
+    static const char kUpdatePayloadPublicKeyOverridePath[];
 
     PayloadProcessor(PrefsInterface *prefs, InstallPlan *install_plan);
 
@@ -157,6 +158,11 @@ private:
     // The public key to be used. Provided as a member so that tests can
     // override with test keys.
     std::string public_key_path_;
+
+    // An alternative public key to use. If it exists this will be used
+    // otherwise public_key_path_ is used. Provided as a member so that
+    // tests can override with test keys.
+    std::string public_key_override_path_;
 
     DISALLOW_COPY_AND_ASSIGN(PayloadProcessor);
 };

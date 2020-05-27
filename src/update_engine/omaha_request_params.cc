@@ -45,13 +45,14 @@ bool OmahaRequestParams::Init(bool interactive)
         os_platform_ = "reMarkable2";
     }
 
-    os_sp_ = app_version_ + "_" + GetMachineType();
-    os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
 
     app_id_ = GetConfValue("REMARKABLE_RELEASE_APPID", OmahaRequestParams::kAppId);
     app_channel_ = GetConfValue("GROUP", kDefaultChannel);
     app_lang_ = "en-US";
     app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");
+
+    os_sp_ = app_version_ + "_" + GetMachineType();
+    os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
 
     oemid_ = GetConfValue("deviceid", "");
     oemversion_ = GetOemValue("VERSION_ID", "");

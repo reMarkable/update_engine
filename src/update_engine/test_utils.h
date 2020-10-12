@@ -193,7 +193,7 @@ private:
 class NoneType;
 
 template<typename T>
-class ObjectFeederAction;
+struct ObjectFeederAction;
 
 template<typename T>
 class ActionTraits<ObjectFeederAction<T>>
@@ -238,7 +238,7 @@ private:
 };
 
 template<typename T>
-class ObjectCollectorAction;
+struct ObjectCollectorAction;
 
 template<typename T>
 class ActionTraits<ObjectCollectorAction<T>>

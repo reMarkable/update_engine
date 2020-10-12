@@ -12,7 +12,8 @@ AM_CPPFLAGS = -I$(srcdir)/src -I$(builddir)/src
 AM_CFLAGS = -fno-exceptions \
 	    -fno-strict-aliasing \
 	    -Wall \
-	    -Wclobbered \
+	    -Wextra \
+	    -Wno-unused-parameter \
 	    -Wempty-body \
 	    -Wignored-qualifiers \
 	    -Wmissing-field-initializers \

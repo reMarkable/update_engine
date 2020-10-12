@@ -21,6 +21,7 @@ using testing::_;
 using testing::NiceMock;
 using testing::Return;
 using testing::SetArgumentPointee;
+using testing::DoAll;
 
 namespace chromeos_update_engine {
 

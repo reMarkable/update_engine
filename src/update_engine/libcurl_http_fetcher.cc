@@ -135,6 +135,11 @@ void LibcurlHttpFetcher::ResumeTransfer(const std::string &url)
     CHECK_EQ(curl_easy_setopt(curl_handle_, CURLOPT_MAXREDIRS, kMaxRedirects),
              CURLE_OK);
 
+    // Some broken servers close the connection immediately after sendin a
+    // redirect, which curl interprets as a failure. So instead of counting a
+    // redirect against kMaxRedirects it counts it against failure retries (5).
+    CHECK_EQ(curl_easy_setopt(curl_handle_, CURLOPT_FORBID_REUSE, 1), CURLE_OK);
+
     // For the sake of security if this is an official build lock down
     // the appropriate curl options for HTTP or HTTPS depending on the url.
     if (IsOfficialBuild()) {

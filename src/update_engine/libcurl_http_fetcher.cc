@@ -289,6 +289,7 @@ void LibcurlHttpFetcher::CurlPerformOnce()
             // should be unified into a complete, coherent interface.
             LOG(INFO) << "Transfer resulted in an error (" << http_response_code_
                       << "), " << bytes_downloaded_ << " bytes downloaded";
+            LOG(INFO) << "Error buffer: " << curl_error_buffer_;
 
             if (delegate_) {
                 delegate_->TransferComplete(this, false);    // signal fail

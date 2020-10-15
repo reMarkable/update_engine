@@ -116,5 +116,10 @@ AC_ARG_ENABLE([gcov],
                               [use gcov to gather test coverage data])])
 AM_CONDITIONAL([ENABLE_GCOV], [test "x$enable_gcov" = "xyes"])
 
+AC_ARG_ENABLE([sanitizers],
+              [AS_HELP_STRING([--enable-sanitizers],
+                              [enable runtime checking for undefined behavior, memory leaks, etc.])])
+AM_CONDITIONAL([ENABLE_SANITIZERS], [test "x$enable_sanitizers" = "xyes"])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

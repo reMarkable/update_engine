@@ -203,6 +203,9 @@ private:
     // Gets the machine type (e.g. "i686").
     std::string GetMachineType() const;
 
+    // Gets the device serial number
+    std::string GetSerialnumber() const;
+
     // Global system context.
     SystemState *system_state_;
 

@@ -55,10 +55,8 @@ bool OmahaRequestParams::Init(bool interactive)
     os_sp_ = app_version_ + "_" + GetMachineType();
     os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
 
+
     oemid_ = GetSerialnumber();
-    if (oemid_.empty()) {
-        LOG(ERROR) << "Unable to get serialnumber";
-    }
 
     oemversion_ = GetOemValue("VERSION_ID", "");
 
@@ -113,26 +111,42 @@ string OmahaRequestParams::SearchConfValue(const vector<string> &files,
 
 string OmahaRequestParams::GetSerialnumber() const
 {
-    string name;
-
+    std::string partitionName;
     if (os_platform_ == "reMarkable2") {
-        name = "/dev/mmcblk2boot1";
+        partitionName = "/dev/mmcblk2boot1";
+    } else if (os_platform_ == "reMarkable") {
+        partitionName = "/dev/mmcblk1boot1";
     } else {
-        name = "/dev/mmcblk1boot1";
+        LOG(INFO) << "Unsupported platform " << os_platform_;
+        return string();
     }
 
-    std::ifstream file(name);
+    std::ifstream partition(partitionName);
+    if (!partition.is_open()) {
+        LOG(ERROR) << "Unable to open: " << partitionName;
+        return string();
+    }
 
-    if (!file.is_open()) {
-        LOG(ERROR) << "Unable to open: " << name;
+    const string serialNumber = read_serial_number(&partition);
+    if (serialNumber.empty()) {
+        LOG(ERROR) << "Unable to get serialnumber";
+    }
+
+    return serialNumber;
+}
+
+string OmahaRequestParams::read_serial_number(std::istream *file)
+{
+    if (!file->good()) {
+        LOG(ERROR) << "Can't read serial number from unreadable stream";
         return string();
     }
 
     // The device serial number is written using QDataStream.
     // Byte-order for field length is big-endian.
     uint32_t fieldLengthBigEndian;
-    if (!file.read(reinterpret_cast<char*>(&fieldLengthBigEndian), sizeof fieldLengthBigEndian)) {
-        LOG(ERROR) << "Error parsing serial number stream";
+    if (!file->read(reinterpret_cast<char*>(&fieldLengthBigEndian), sizeof fieldLengthBigEndian)) {
+        LOG(ERROR) << "Short read reading serial number field length";
         return string();
     }
 
@@ -143,9 +157,13 @@ string OmahaRequestParams::GetSerialnumber() const
         LOG(ERROR) << "Too long field";
         return string();
     }
+    if (fieldLength == 0) {
+        LOG(ERROR) << "empty field?";
+        return string();
+    }
     std::vector<char> serialNumber(fieldLength);
 
-    if (!file.read(serialNumber.data(), serialNumber.size())) {
+    if (!file->read(serialNumber.data(), serialNumber.size())) {
         LOG(ERROR) << "Error parsing serial number stream";
         return string();
     }
@@ -161,7 +179,6 @@ string OmahaRequestParams::GetSerialnumber() const
         LOG(ERROR) << "Error parsing serial number stream";
     }
 
-    file.close();
     return string(serialNumber.begin(), serialNumber.end());
 }
 

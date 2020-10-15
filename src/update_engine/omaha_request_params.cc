@@ -149,6 +149,17 @@ string OmahaRequestParams::GetSerialnumber() const
         LOG(ERROR) << "Error parsing serial number stream";
         return string();
     }
+    for (const char c : serialNumber) {
+        // This is stuffed straight into the XML, so sanitize it
+        if ((c < '0' && c != '-') ||
+            (c > '9' && c < 'A') ||
+            (c > 'Z' && c < 'a') ||
+            (c > 'z' && c != '{' && c != '}')) {
+            LOG(ERROR) << "Invalid character 0x" << std::hex << uint32_t(c) << " in serial";
+            return string();
+        }
+        LOG(ERROR) << "Error parsing serial number stream";
+    }
 
     file.close();
     return string(serialNumber.begin(), serialNumber.end());

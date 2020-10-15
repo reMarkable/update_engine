@@ -37,6 +37,11 @@ AM_CFLAGS += -fprofile-arcs -ftest-coverage
 LDADD += -lgcov
 endif
 
+if ENABLE_SANITIZERS
+AM_CFLAGS += -fsanitize=undefined -fsanitize=address
+AM_CXXFLAGS += -fsanitize=undefined -fsanitize=address
+endif
+
 sbin_PROGRAMS = update_engine rootdev
 bin_PROGRAMS = update_engine_client
 if ENABLE_DELTA_GENERATOR

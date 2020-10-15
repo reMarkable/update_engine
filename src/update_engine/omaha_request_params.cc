@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "update_engine/simple_key_value_store.h"
 #include "update_engine/system_state.h"
@@ -54,7 +55,11 @@ bool OmahaRequestParams::Init(bool interactive)
     os_sp_ = app_version_ + "_" + GetMachineType();
     os_board_ = GetConfValue("REMARKABLE_RELEASE_BOARD", "");
 
-    oemid_ = GetConfValue("deviceid", "");
+    oemid_ = GetSerialnumber();
+    if (oemid_.empty()) {
+        LOG(ERROR) << "Unable to get serialnumber";
+    }
+
     oemversion_ = GetOemValue("VERSION_ID", "");
 
     if (!system_state_->prefs()->GetString(kPrefsAlephVersion, &alephversion_)) {
@@ -104,6 +109,49 @@ string OmahaRequestParams::SearchConfValue(const vector<string> &files,
 
     // not found
     return default_value;
+}
+
+string OmahaRequestParams::GetSerialnumber() const
+{
+    string name;
+
+    if (os_platform_ == "reMarkable2") {
+        name = "/dev/mmcblk2boot1";
+    } else {
+        name = "/dev/mmcblk1boot1";
+    }
+
+    std::ifstream file(name);
+
+    if (!file.is_open()) {
+        LOG(ERROR) << "Unable to open: " << name;
+        return string();
+    }
+
+    // The device serial number is written using QDataStream.
+    // Byte-order for field length is big-endian.
+    uint32_t fieldLengthBigEndian;
+    if (!file.read(reinterpret_cast<char*>(&fieldLengthBigEndian), sizeof fieldLengthBigEndian)) {
+        LOG(ERROR) << "Error parsing serial number stream";
+        return string();
+    }
+
+    uint32_t fieldLength = __bswap_32(fieldLengthBigEndian);
+
+    // Set a simple max length for the serial number to validate a little
+    if (fieldLength > 128) {
+        LOG(ERROR) << "Too long field";
+        return string();
+    }
+    std::vector<char> serialNumber(fieldLength);
+
+    if (!file.read(serialNumber.data(), serialNumber.size())) {
+        LOG(ERROR) << "Error parsing serial number stream";
+        return string();
+    }
+
+    file.close();
+    return string(serialNumber.begin(), serialNumber.end());
 }
 
 string OmahaRequestParams::GetConfValue(const string &key,

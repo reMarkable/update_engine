@@ -185,6 +185,9 @@ public:
     // For unit-tests.
     void set_root(const std::string &root);
 
+    // Public for testing
+    static std::string read_serial_number(std::istream *file);
+
 private:
     // Fetches the value for a given key from update.conf files.
     std::string GetConfValue(const std::string &key,

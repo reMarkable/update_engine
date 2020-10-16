@@ -238,6 +238,9 @@ TEST_F(OmahaRequestParamsTest, ParseSerialTest)
     EXPECT_EQ("", OmahaRequestParams::read_serial_number(&stream));
     EXPECT_TRUE(stream.tellg() > 0); // make sure it actually read something
 
+    // As Preben pointed out Qt uses 0xFFFFFFFF, i. e. uint32_t(-1), for empty
+    // byte arrays, so returning an empty string might actually be the correct
+    // here.
     static const char *invalidLengthData =
         "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
         "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
@@ -250,6 +253,32 @@ TEST_F(OmahaRequestParamsTest, ParseSerialTest)
     stream.str(std::string(invalidLengthData, dataSize));
     EXPECT_EQ("", OmahaRequestParams::read_serial_number(&stream));
     EXPECT_TRUE(stream.tellg() > 0);
+
+    static const char *zeroData =
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    stream.str(std::string(zeroData, dataSize));
+    EXPECT_EQ("", OmahaRequestParams::read_serial_number(&stream));
+    EXPECT_TRUE(stream.tellg() > 0);
+
+    static const char *validData =
+        "\x00\x00\x00\x0f\x52\x4d\x30\x30\x30\x2d\x30\x30"
+        "\x30\x2d\x30\x30\x30\x30\x30\x00\x00\x00\x0c\x46"
+        "\x55\x4d\x32\x32\x30\x32\x39\x30\x30\x30\x32\x00"
+        "\x00\x00\x0f\x42\x59\x44\x32\x30\x30\x33\x30\x33"
+        "\x30\x30\x30\x32\x36\x39\x00\x00\x00\x19\x45\x52"
+        "\x4c\x41\x38\x52\x57\x32\x31\x55\x42\x56\x30\x30"
+        "\x44\x34\x37\x41\x54\x20\x2d\x31\x2e\x36\x34\x00"
+        "\x00\x00\x00\x54\x45\x53\x54\x53\x5f\x44\x4f\x4e";
+    stream.str(std::string(validData, dataSize));
+    EXPECT_EQ("RM000-000-00000", OmahaRequestParams::read_serial_number(&stream));
+    EXPECT_EQ(stream.tellg(), 19); // 4 bytes uint32 for the length, 15 bytes string
 }
 
 }  // namespace chromeos_update_engine

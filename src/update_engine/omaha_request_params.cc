@@ -176,7 +176,6 @@ string OmahaRequestParams::read_serial_number(std::istream *file)
             LOG(ERROR) << "Invalid character 0x" << std::hex << uint32_t(c) << " in serial";
             return string();
         }
-        LOG(ERROR) << "Error parsing serial number stream";
     }
 
     return string(serialNumber.begin(), serialNumber.end());

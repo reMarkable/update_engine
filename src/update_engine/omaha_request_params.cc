@@ -48,7 +48,7 @@ bool OmahaRequestParams::Init(bool interactive)
 
 
     app_id_ = GetConfValue("REMARKABLE_RELEASE_APPID", OmahaRequestParams::kAppId);
-    app_channel_ = GetConfValue("GROUP", kDefaultChannel);
+    app_channel_ = GetConfValue("CHANNEL", kDefaultChannel);
     app_lang_ = "en-US";
     app_version_ = GetConfValue("REMARKABLE_RELEASE_VERSION", "");
 
